@@ -1,0 +1,94 @@
+import { useEffect } from "react";
+import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
+import Arrowleft from "../assets/images/arrow-left.svg";
+import { useNavigation } from "@react-navigation/native";
+import Background from "@/components/background";
+export default function Signup() {
+  const navigation = useNavigation();
+    useEffect(() => {
+      navigation.setOptions({
+        headerShown: false,
+      });
+    }, []);
+    
+  return (
+    <Background><View style={styles.forgetcard}>
+          <View style={styles.header}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <Arrowleft width={5.5} height={12} />
+            </Pressable>
+            <Text style={{ fontSize: 16, fontWeight: 700 }}>用户注册</Text>
+          </View>
+          <View style={styles.body}>
+            <Text>邮箱</Text>
+            <TextInput
+              style={styles.inputKuang}
+              placeholder="请输入邮箱"
+            ></TextInput>
+            <Text>验证码</Text>
+            <TextInput
+              style={styles.inputKuang}
+              placeholder="请输入验证码"
+            ></TextInput>
+            <Text>设置新密码</Text>
+            <TextInput
+              style={styles.inputKuang}
+              placeholder="请输入新密码"
+            ></TextInput>
+            <Text>确认新密码</Text>
+            <TextInput
+              style={styles.inputKuang}
+              placeholder="请再次确认新密码"
+            ></TextInput>
+          </View>
+          <Pressable style={styles.loginBtn}>
+            <Text style={styles.loginText}>确认</Text>
+          </Pressable>
+        </View>
+    </Background>
+  )
+}
+const styles = StyleSheet.create({
+  forgetcard: {
+    backgroundColor: "#ffffff",
+    width: 327,
+    height: 460,
+    borderRadius: 24,
+    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+  },
+  header: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 100,
+  },
+  body: {
+    marginVertical: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 7,
+  },
+  inputKuang: {
+    backgroundColor: "#EEEEEE",
+    width: 296,
+    height: 47,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    fontSize: 14,
+  },
+  loginBtn: {
+    backgroundColor: "#72B6FF",
+    width: 296,
+    height: 47,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loginText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+});
