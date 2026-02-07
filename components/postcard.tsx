@@ -12,14 +12,14 @@ import HaveLightIdea from '../assets/images/havelightIdea.svg'
 import Heart from '../assets/images/heart.svg'
 import HeartLight from '../assets/images/heartlight.svg'
 import { useState } from 'react';
-import { Post } from '@/app/api/interface';
+import  Post  from '@/app/api/interface';
 const { width: screenWidth } = Dimensions.get('window');
 
   export function PostCard({post}:{post:Post} ) {
   const [hasInspiration, setHasInspiration] = useState(post.hasInspiration);
   const [hasEmpathy, setHasEmpathy] = useState(post.hasempathy);
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(1);
   const toggleInspiration = () => {
     setHasInspiration(!hasInspiration);
   };
@@ -53,7 +53,7 @@ const { width: screenWidth } = Dimensions.get('window');
       )}
       {post.images.length > 1 && (
         <View style={styles.imageIndicatorContainer}>
-          {post.images.map((_,index: number )=> (
+          {post.images.map((_: any,index: number )=> (
             <View
               key={index}
               style={[
@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   postCard: {
     marginBottom: 24,
     borderRadius: 12,
+    height:500,
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
@@ -117,11 +118,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    position: 'relative', // 关键：让页码角标基于卡片定位
+    position: 'relative', 
   },
   postImage: {
     width: screenWidth - 32,
-    height: 240,
+    height: 436,
     resizeMode: 'cover',
   },
   // 图片页码角标样式（右下角）
@@ -130,11 +131,13 @@ const styles = StyleSheet.create({
     height:16,
     position: 'absolute',
     right: 12,
-    bottom: 70, // 避开图片底部，和互动区错开
+    bottom: 70, 
     backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   pageBadgeText: {
     fontSize: 10,

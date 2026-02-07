@@ -35,6 +35,7 @@ import Camera from '../assets/images/photogarph.svg'
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 0.8,
+      allowsMultipleSelection: true,
     });
     if (!result.canceled) {
       console.log('选择的照片:', result.assets[0].uri);//后续处理上传的照片

@@ -1,10 +1,8 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, TextInput } from "react-native";
-import React, { useEffect } from "react";
-import { View, Text, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import Background from "@/components/background";
 import Arrowleft from "@/assets/images/arrow-left.svg";
+import Background from "@/components/background";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 export default function ForgotPassword() {
   const navigation = useNavigation();
   useEffect(() => {
@@ -67,7 +65,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 100,
-    
   },
   body: {
     marginVertical: 20,

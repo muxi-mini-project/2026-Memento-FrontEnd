@@ -13,20 +13,21 @@ import { Link, useNavigation } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Agree from "../assets/images/agree.svg";
-import { loginPwd } from "./api/user";
+import { loginPwd, sendlogincode,loginPhone} from "./api/user";
 type LoginType = "phone" | "password";
 export default function SignIn() {
   const [loginway, setLoginway] = useState<LoginType>("password");
   const [agree, setAgree] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, []);
-  const handlelogin = async () => {
+  const handleloginByPwd = async () => {
     if (!agree) {
       alert("请阅读并同意《隐私协议》和《用户协议》");
       return;
@@ -49,6 +50,34 @@ export default function SignIn() {
       }
     }
   };
+  const handleSendCode = async () => {
+    if (!email) {
+      alert("请输入邮箱");
+      return;
+    }
+    const res = await sendlogincode(email);
+    if (res.status === 204) {
+      alert("验证码已发送，请注意查收");
+    } else {
+      alert("验证码发送失败，请稍后再试");
+  }
+}
+  const handldeloginByPhone = async() => {
+    if (!agree) {
+      alert("请阅读并同意《隐私协议》和《用户协议》");
+      return;
+  }
+  const res=await loginPhone(email,code)
+  if(res.status===200){
+    const { access_token, refresh_token, expires_in, token_type } = res.data;
+    await SecureStore.setItemAsync("access_token", access_token);
+    await SecureStore.setItemAsync("refresh_token", refresh_token);
+    // await SecureStore.setItemAsync("expires_in", expires_in.toString());
+    await SecureStore.setItemAsync("token_type", token_type);
+    navigation.navigate("index" as never); ;
+  }else{
+    alert("登录失败，请检查邮箱和验证码");}
+}
   return (
     <SafeAreaProvider style={styles.container}>
       <LinearGradient
@@ -112,7 +141,7 @@ export default function SignIn() {
                   </Link>
                 </View>
               </View>
-              <Pressable style={styles.loginBtn} onPress={handlelogin}>
+              <Pressable style={styles.loginBtn} onPress={handleloginByPwd}>
                 <Text style={styles.loginText}>登录</Text>
               </Pressable>
               <View
@@ -150,6 +179,8 @@ export default function SignIn() {
                     style={styles.Inputkuang}
                     placeholder="请输入邮箱"
                     placeholderTextColor="#999"
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
                   ></TextInput>
                 </View>
                 <View style={{ position: "relative" }}>
@@ -158,14 +189,16 @@ export default function SignIn() {
                     style={styles.Inputkuang}
                     placeholder="请输入邮箱"
                     placeholderTextColor="#999"
+                    value={code}
+                    onChangeText={(text) => setCode(text)}
                   ></TextInput>
-                  <Pressable style={styles.getcode}>
+                  <Pressable style={styles.getcode} onPress={handleSendCode}>
                     {/* 后续点击获取验证码 */}
                     <Text style={styles.getcodeText}>获取验证码</Text>
                   </Pressable>
                 </View>
               </View>
-              <Pressable style={styles.loginBtn}>
+              <Pressable style={styles.loginBtn} onPress={handldeloginByPhone}>
                 <Text style={styles.loginText}>登录</Text>
               </Pressable>
               <View

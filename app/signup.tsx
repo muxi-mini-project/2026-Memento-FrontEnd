@@ -1,20 +1,23 @@
-import { useEffect, useState, useRef } from "react"; // 新增useRef用于防抖定时器
-import * as SecureStore from "expo-secure-store";
-import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
-import Arrowleft from "../assets/images/arrow-left.svg";
-import AgreeIcon from "../assets/images/agreeIcon.svg";
-import Warning from "../assets/images/warning.svg";
-import Pass from "../assets/images/pass.svg";
-import { useNavigation } from "@react-navigation/native";
 import Background from "@/components/background";
-import { sendCode, verifyCode, signupComplete } from "./api/user";
+import { useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useRef, useState } from "react"; // 新增useRef用于防抖定时器
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import AgreeIcon from "../assets/images/agreeIcon.svg";
+import Arrowleft from "../assets/images/arrow-left.svg";
+import Pass from "../assets/images/pass.svg";
+import Warning from "../assets/images/warning.svg";
+import { sendCode, signupComplete, verifyCode } from "./api/user";
 
 export default function Signup() {
-  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning/>);
+  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(
+    <Warning />,
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState(""); 
-  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(null); 
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [verifypasswordResult, setVerifypasswordResult] =
+    useState<React.ReactNode>(null);
   const [countdown, setCountdown] = useState(0);
   const [sendCodeText, setSendCodeText] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -35,14 +38,14 @@ export default function Signup() {
     pwdDebounceTimer.current = setTimeout(() => {
       if (password && confirmPwd) {
         if (password === confirmPwd) {
-          setVerifypasswordResult(<Pass />); 
+          setVerifypasswordResult(<Pass />);
         } else {
-          setVerifypasswordResult(<Warning />); 
+          setVerifypasswordResult(<Warning />);
         }
       } else {
-        setVerifypasswordResult(<Warning></Warning>); 
+        setVerifypasswordResult(<Warning></Warning>);
       }
-    }, 500); 
+    }, 500);
   };
 
   useEffect(() => {
@@ -52,8 +55,7 @@ export default function Signup() {
         clearTimeout(pwdDebounceTimer.current);
       }
     };
-  }, [password, confirmPwd]); 
-
+  }, [password, confirmPwd]);
 
   const handleSendCode = async () => {
     if (!email) {
@@ -77,7 +79,7 @@ export default function Signup() {
               return prev - 1;
             }
           });
-        }, 1000); 
+        }, 1000);
       } else {
         alert("发送验证码失败，请稍后重试");
         console.log("发送验证码失败:", res);
@@ -105,14 +107,14 @@ export default function Signup() {
       alert("请先完成邮箱验证码验证");
       return;
     }
-  
+
     try {
       const res = await signupComplete({ signup_token, password });
 
       console.log("注册结果", res);
       if (res.status === 200) {
         alert("注册成功");
-        
+
         navigation.navigate("signin" as never);
       } else {
         alert("注册失败，请稍后重试");
@@ -129,7 +131,7 @@ export default function Signup() {
     }
     try {
       const res = await verifyCode({ email, code: sendCodeText });
-      console.log("验证码校验结果",res);
+      console.log("验证码校验结果", res);
       if (res.status === 200 && res.data.valid === true) {
         setVerifyResult(<Pass />);
         await SecureStore.setItemAsync("signup_token", res.data.signup_token);
@@ -143,7 +145,7 @@ export default function Signup() {
     }
   };
   useEffect(() => {
-    if (sendCodeText.length === 6&&countdown !== 0) {
+    if (sendCodeText.length === 6 && countdown !== 0) {
       handleVerify();
     } else {
       setVerifyResult(<Warning />);
@@ -176,9 +178,16 @@ export default function Signup() {
             style={styles.inputKuang}
             placeholder="请输入邮箱"
             onChangeText={(text) => setEmail(text)}
-            value={email} 
+            value={email}
           />
-          <View style={{display:"flex",flexDirection:"row",alignItems:"center",gap:5}}>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
             <Text style={styles.tiptext}>验证码</Text>
             <View>{verifyResult}</View>
           </View>
@@ -186,31 +195,39 @@ export default function Signup() {
             style={styles.inputKuang}
             placeholder="请输入验证码"
             onChangeText={(text) => setSendCodeText(text)}
-            value={sendCodeText} 
+            value={sendCodeText}
             maxLength={6}
-            keyboardType="numeric" 
-          />          <Text style={styles.tiptext}>设置密码</Text>
+            keyboardType="numeric"
+          />{" "}
+          <Text style={styles.tiptext}>设置密码</Text>
           <TextInput
             style={styles.inputKuang}
             autoComplete="off"
             placeholder="请输入新密码"
             secureTextEntry
-            onChangeText={(text) => setPassword(text)} 
-            value={password} 
-            autoCapitalize="none" 
-            autoCorrect={false} 
+            onChangeText={(text) => setPassword(text)}
+            value={password}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
-          <View style={{display:"flex",flexDirection:"row",alignItems:"center",gap:5}}>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
             <Text style={styles.tiptext}>确认密码</Text>
-            <View>{verifypasswordResult}</View> 
+            <View>{verifypasswordResult}</View>
           </View>
           <TextInput
             style={styles.inputKuang}
             autoComplete="off"
             placeholder="请再次输入密码"
             secureTextEntry
-            onChangeText={(text) => setConfirmPwd(text)} 
-            value={confirmPwd} 
+            onChangeText={(text) => setConfirmPwd(text)}
+            value={confirmPwd}
             autoCapitalize="none"
             autoCorrect={false}
           />

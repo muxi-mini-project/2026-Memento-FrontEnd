@@ -52,12 +52,12 @@ export const sendlogincode=(email:string)=>{
             data:{email}
         })
 }
-export const loginPhone = (phone:string, code:string)=>{
+export const loginPhone = (email:string, code:string)=>{
     return request(
         {
             url:"/v1/auth/login/email/verify_code",
             method:"POST",
-            data:{phone, code}
+            data:{email, code}
         }
     )
 }
