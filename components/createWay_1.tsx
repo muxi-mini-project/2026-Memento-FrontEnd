@@ -5,6 +5,7 @@ import { Pressable, Text, View, StyleSheet, Alert } from "react-native";
 import { PhotoObject } from "../app/api/interface";
 export function TakePhotoWay() {
   // 打开相机
+   const router=useRouter();
   const handleOpenCamera = async () => {
     // 申请相机权限
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -21,6 +22,10 @@ export function TakePhotoWay() {
       console.log("拍摄的照片:", result.assets[0].uri);
       Alert.alert("拍摄成功", `已获取照片：${result.assets[0].uri.substring(0, 20)}...`);
     }
+    router.navigate({
+      pathname: "/beforepulish",
+ 
+    });
   };
 
   return (
@@ -67,7 +72,12 @@ export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
         onPhotosSelected(selectedPhotos);
       }
       console.log("子组件选中的照片列表:", selectedPhotos);
-      router.navigate("/beforePulish")
+    router.navigate({
+      pathname: "/beforepulish",
+        params: {
+        photos: JSON.stringify(selectedPhotos)
+      }
+    })
       
     }
   };
@@ -101,5 +111,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#72B6FF",
     marginTop: 2,
+    lineHeight: 20,
   },
 });
