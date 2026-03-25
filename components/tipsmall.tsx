@@ -1,9 +1,9 @@
+import { PromptWords } from "@/app/api/interface";
+import { drawOfficialPrompt } from "@/app/api/keywords";
+import usePromptStore from "@/app/stores/usePromptStore";
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import  Createway  from "./createway";
-import { drawOfficialPrompt } from "@/app/api/keywords";
-import { PromptWords } from "@/app/api/interface";
-import usePromptStore from "@/app/stores/usePromptStore";
+import Createway from "./createway";
 
 interface SmalltipProps {
   borderColor: string;
@@ -19,16 +19,17 @@ export default function Smalltip({
   tagText,
   tagColor,
   describeText,
-  kind
+  kind,
 }: SmalltipProps) {
   const [detail, setDetail] = useState(false);
-  const  [ideas, setIdeas]=useState("")
-  const id=usePromptStore((state)=>state.keyword_id)
-const getPromptWords= async()=>{
-  
-    const Words = await drawOfficialPrompt(id,kind);
-    setIdeas(Words.data.content)
-}
+  const [ideas, setIdeas] = useState("");
+  const id = usePromptStore((state) => state.keyword_id);
+  const getPromptWords = async () => {
+    console.log(id, kind);
+    const Words = await drawOfficialPrompt(id, kind);
+
+    setIdeas(Words.data.content);
+  };
   return (
     <>
       <Pressable
@@ -39,9 +40,10 @@ const getPromptWords= async()=>{
             padding: 22,
           },
         ]}
-        onPress={() => {setDetail(true)
-          getPromptWords()}
-        }
+        onPress={() => {
+          setDetail(true);
+          getPromptWords();
+        }}
       >
         <Text style={[styles.findtext]}>{tagText}</Text>
         <Text style={[styles.findsmalltext, { color: textColor }]}>
@@ -58,7 +60,6 @@ const getPromptWords= async()=>{
           <Pressable
             style={styles.modalContent}
             onPress={(e) => e.stopPropagation()}
-
           >
             <View style={[styles.findkuang, { borderColor: borderColor }]}>
               <Text style={[styles.ideatext, { color: textColor }]}>
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   ideatext: {
     fontSize: 22,
     fontWeight: "400",
-    padding :10
+    padding: 10,
   },
   findtext: {
     color: "#333333",
