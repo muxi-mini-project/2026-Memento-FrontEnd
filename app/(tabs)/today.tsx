@@ -5,7 +5,8 @@ import {
   View,
   ScrollView,
   Pressable,
-  Alert
+  Alert,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Memento from "../../assets/images/memento.svg";
@@ -15,60 +16,65 @@ import { Link } from "expo-router";
 import { PhotoObject } from "../api/interface";
 import { getKeywords, getoffcialHome } from "../api/keywords";
 import usePromptStore from "../stores/usePromptStore";
+import TalkKuang from "../../assets/images/talkkuang.svg";
 export default function TabTwoScreen() {
-  const [dailysentence, setDailysentence] = useState("很多快乐来不及命名,只被当作日常");
+  const [dailysentence, setDailysentence] =
+    useState("很多快乐来不及命名,只被当作日常");
   const [keyWords_text, setKeyWords_text] = useState(" 关键词");
   const [participant_user_count, setParticipant_user_count] = useState(0);
-  const[yesterday_user_count, setYesterday_user_count ]= useState(0);
-  const date=usePromptStore((state)=>state.biz_date)
-  const setDate=usePromptStore((state)=>state.setdate)
-  const setKeywordId=usePromptStore((state)=>state.setKeywordId)
-  const setBiz_date=usePromptStore((state)=>state.setBiz_date)
-  const setTodayKeyword=usePromptStore((state)=>state.setTodayKeyword)
-  const setYesterdaysKeyword=usePromptStore((state)=>state.setYesterdaysKeyword)
-  const setYesterdaydate=usePromptStore((state)=>state.setYesterdaydate)
-  const handlePhotosSelected = (photos:PhotoObject[]) => {
+  const [yesterday_user_count, setYesterday_user_count] = useState(0);
+  const date = usePromptStore((state) => state.biz_date);
+  const setDate = usePromptStore((state) => state.setdate);
+  const setKeywordId = usePromptStore((state) => state.setKeywordId);
+  const setBiz_date = usePromptStore((state) => state.setBiz_date);
+  const setTodayKeyword = usePromptStore((state) => state.setTodayKeyword);
+  const setYesterdaysKeyword = usePromptStore(
+    (state) => state.setYesterdaysKeyword,
+  );
+  const setYesterdaydate = usePromptStore((state) => state.setYesterdaydate);
+  const handlePhotosSelected = (photos: PhotoObject[]) => {
     console.log("父组件收到的照片列表:", photos);
     Alert.alert("成功", `共选中 ${photos.length} 张照片`);
   };
   const formatDate = (dateStr: string) => {
-  if (!dateStr || !dateStr.includes('-')) {
-    return dateStr;
-  }
-  const [year, month, day] = dateStr.split('-');  const formattedMonth = Number(month).toString();
-  const formattedDay = Number(day).toString();
-  return `${year}/${formattedMonth}/${formattedDay}`;
-};
-  
-  useEffect((()=>{
-    const fetchKeyWords= async()=>{
-    try{
-      const response = await getoffcialHome();
-      const data = response.data;
-      const today=data.today;
-      const yesterday=data.yesterday;
-      setKeyWords_text(today.keyword.text);
-      setTodayKeyword(today.keyword.text)
-      setDate(today.biz_date)
-      setParticipant_user_count(today.participant_user_count)
-      setYesterday_user_count(yesterday.participant_user_count)
-      setKeywordId(today.keyword.id)
-      setBiz_date(formatDate(today.biz_date))
-      setYesterdaysKeyword(yesterday.keyword.text)
-      setYesterdaydate(yesterday.biz_date)
-    }catch(error){
-      console.log(error,"oooooo");
-      Alert.alert("错误", "获取关键词失败");
+    if (!dateStr || !dateStr.includes("-")) {
+      return dateStr;
     }
-  }
-  fetchKeyWords();
+    const [year, month, day] = dateStr.split("-");
+    const formattedMonth = Number(month).toString();
+    const formattedDay = Number(day).toString();
+    return `${year}/${formattedMonth}/${formattedDay}`;
+  };
 
-  }), []);
+  useEffect(() => {
+    const fetchKeyWords = async () => {
+      try {
+        const response = await getoffcialHome();
+        const data = response.data;
+        const today = data.today;
+        const yesterday = data.yesterday;
+        setKeyWords_text(today.keyword.text);
+        setTodayKeyword(today.keyword.text);
+        setDate(today.biz_date);
+        setParticipant_user_count(today.participant_user_count);
+        setYesterday_user_count(yesterday.participant_user_count);
+        setKeywordId(today.keyword.id);
+        setBiz_date(formatDate(today.biz_date));
+        setYesterdaysKeyword(yesterday.keyword.text);
+        setYesterdaydate(yesterday.biz_date)
+        
+      } catch (error) {
+        console.log(error, "oooooo");
+        Alert.alert("错误", "获取关键词失败");
+      }
+    };
+    fetchKeyWords();
+  }, []);
   const changesentence = () => {
     const randomIndex = Math.floor(Math.random() * dailysentenceku.length);
     setDailysentence(dailysentenceku[randomIndex]);
   };
-  const dailysentenceku= [
+  const dailysentenceku = [
     "很多快乐来不及命名,只被当作日常",
     "用微小的事物感知幸福",
     "好在时间是个很大的容器",
@@ -79,45 +85,51 @@ export default function TabTwoScreen() {
     "焦虑也没关系，饼干焦焦的也很好吃",
   ];
   return (
-    <ScrollView >
+    <ScrollView>
       <SafeAreaProvider style={styles.container}>
-      <View style={styles.dateIconRow}>
-        <Text style={styles.dateText}>{date}</Text>
-        <Idea></Idea>
-      </View>
+        <View style={styles.dateIconRow}>
+          <Text style={styles.dateText}>{date}</Text>
+          <Idea></Idea>
+        </View>
 
-      <Pressable style={{ position: "absolute", top: 35, left: -19 }} onPress={changesentence}>
-        <Memento width={234} height={234}></Memento>
-      </Pressable>
-      <View style={styles.talkkuang}>
-        <Text style={styles.talktext}>{dailysentence}</Text>
+        <Pressable
+          style={{ position: "absolute", top: 35, left: -19 }}
+          onPress={changesentence}
+        >
+          <Memento width={234} height={234}></Memento>
+        </Pressable>
+        <View style={styles.talkkuang}>
+          <TalkKuang style={{ position: "absolute" }} />
+          <Text style={styles.talktext}>{dailysentence}</Text>
+          <View style={styles.triangle} />
+        </View>
 
-      </View>
-
-      <View style={styles.keyword}>
-        <Text style={styles.keywordtext}>{keyWords_text}</Text>
-      </View>
-      <View style={styles.ChooseWay}>
-        <TakePhotoWay></TakePhotoWay>
-        <PhotoWay  onPhotosSelected={handlePhotosSelected}></PhotoWay>
-        
-      </View>
-      <View style={styles.todaydata}>
-        <Text style={styles.todaytext}>今日</Text>
-        <Text style={styles.statText}>已有{participant_user_count}人参与今日创作</Text>
-        <Link href={"/find"} asChild>
-          <Text style={styles.linkText}>查看作品 &gt;</Text>
-        </Link>
-      </View>
-      <View style={styles.todaydata}>
-        <Text style={styles.todaytext}>昨天</Text>
-        <Text style={styles.statText}>已有{yesterday_user_count}人参与昨日创作</Text>
-        <Link href={"/find"} asChild>
-          <Text style={styles.linkText}>查看作品 &gt;</Text>      
-        </Link>
-      </View>
-      
-</SafeAreaProvider>
+        <View style={styles.keyword}>
+          <Text style={styles.keywordtext}>{keyWords_text}</Text>
+        </View>
+        <View style={styles.ChooseWay}>
+          <TakePhotoWay></TakePhotoWay>
+          <PhotoWay onPhotosSelected={handlePhotosSelected}></PhotoWay>
+        </View>
+        <View style={styles.todaydata}>
+          <Text style={styles.todaytext}>今日</Text>
+          <Text style={styles.statText}>
+            已有{participant_user_count}人参与今日创作
+          </Text>
+          <Link href={"/find"} asChild>
+            <Text style={styles.linkText}>查看作品 &gt;</Text>
+          </Link>
+        </View>
+        <View style={styles.todaydata}>
+          <Text style={styles.todaytext}>昨天</Text>
+          <Text style={styles.statText}>
+            已有{yesterday_user_count}人参与昨日创作
+          </Text>
+          <Link href={"/yesterdayfind"} asChild>
+            <Text style={styles.linkText}>查看作品 &gt;</Text>
+          </Link>
+        </View>
+      </SafeAreaProvider>
     </ScrollView>
   );
 }
@@ -142,15 +154,11 @@ const styles = StyleSheet.create({
     fontFamily: "思源黑体",
     fontWeight: "500",
     color: "#999999",
-    letterSpacing:1,
+    letterSpacing: 1,
   },
   talkkuang: {
-    backgroundColor: "#EFF7FF",
-    height: 56,
     width: 160,
-    borderColor: "#72B6FF",
-    borderRadius: 999,
-    borderWidth: 2,
+    height: 58.5,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
@@ -163,13 +171,14 @@ const styles = StyleSheet.create({
     fontFamily: "思源黑体",
     fontWeight: "500",
     color: "#72B6FF",
-    letterSpacing:1,
+    letterSpacing: 1,
     lineHeight: 15,
   },
+  triangle: {},
   keyword: {
     width: 154,
     height: 70,
-    marginTop: 269,//有问题
+    marginTop: 269,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -218,5 +227,4 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 18,
   },
- 
 });
