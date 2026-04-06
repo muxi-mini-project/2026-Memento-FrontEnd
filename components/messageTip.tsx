@@ -1,16 +1,33 @@
+import { notfiItem } from "@/app/api/interface";
 import { View, StyleSheet, ImageBackground, Text } from "react-native";
-export default function MessageTip() {
+import Inspire from "../assets/images/inspiration.svg";
+import Empathy from "../assets/images/resonance.svg";
+export default function MessageTip(props: notfiItem) {
   return (
     <View style={styles.tips}>
       <View style={styles.touxiang}>
-        {/* <ImageBackground source={'../../'}/> */}
+        <ImageBackground source={{ uri: props.actor_avatar_url }} />
+        {props.reaction_type === "inspired" ? (
+          <Inspire style={styles.Icon} />
+        ) : (
+          <Empathy style={styles.Icon}/>
+        )}
       </View>
       <View>
-        <Text>2026/1/22 10:03</Text>
-        <Text>和你有共鸣</Text>
-        {/* 后边传props启发或共鸣 */}
+        <Text style={{ color: "#999", fontSize: 12 }}>{props.created_at}</Text>
+        {props.reaction_type === "inspired" ? (
+          <Text style={styles.Inpiretext}>受到了启发</Text>
+        ) : (
+          <Text style={styles.Inpiretext}>和你有共鸣</Text>
+        )}
       </View>
-      <View style={styles.zuopin}>{/* 封面缩略图 */}</View>
+      <View style={styles.zuopin}>
+        {props.cover_image !== null && (
+          <ImageBackground
+            source={{ uri: props.cover_image.variants.card_4x3.url }}
+          ></ImageBackground>
+        )}
+      </View>
     </View>
   );
 }
@@ -19,25 +36,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 20,
     height: 80,
     width: "100%",
     borderBottomColor: "#EEEEEE",
+    flex: 1,
     borderBottomWidth: 1,
     borderWidth: 0,
+    position: "relative",
   },
   touxiang: {
     width: 40,
     height: 40,
     borderRadius: "50%",
-    backgroundColor: "#585858",
     marginRight: 14,
+    position: "relative",
+  },
+  Icon: {
+    position: "absolute",
+    top:26,
+    left:26,
+    zIndex:1
+  },
+  Inpiretext: {
+    color: "#666666",
+    fontSize: 14,
+    lineHeight: 20,
   },
   zuopin: {
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#70c1dc",
-    marginLeft: 124,
+    overflow: "hidden",
+    position: "absolute",
+    top: 20,
+    right: 24,
   },
 });
