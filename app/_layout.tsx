@@ -21,10 +21,10 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack initialRouteName="(tabs)">
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="beforepublish"
           options={{ headerShown: false }}
-        ></Stack.Screen>
+        ></Stack.Screen> */}
          <Stack.Screen
           name="index"
           options={{ headerShown: false }}
@@ -39,6 +39,14 @@ export default function RootLayout() {
         ></Stack.Screen>
          <Stack.Screen
           name="postCardDetail"
+          options={{ headerShown: false }}
+        ></Stack.Screen>
+          <Stack.Screen
+          name="setAuthdata"
+          options={{ headerShown: false }}
+        ></Stack.Screen>
+         <Stack.Screen
+          name="yesterdayfind"
           options={{ headerShown: false }}
         ></Stack.Screen>
       </Stack>
