@@ -1,38 +1,44 @@
 import { create } from "zustand";
 interface PromptStore {
-  keyword_id:string|null;
-  biz_date:string;
-  date:string|null;
-  todayKeyword:string;
-  yesterdaysKeyword:string;
-  yesterdaysdate:string|null;
-  setTodayKeyword: (todayKeyword:string) => void;
-  setYesterdaysKeyword: (yesterdaysKeyword:string) => void;
-  setKeywordId: (keyword_id:string|null) => void;
-  setBiz_date: (biz_date:string) => void;
-  setYesterdaydate: (yesterdaydate:string|null) => void;
-  setdate: (date:string|null) => void;  
+  keyword_id: string;
+  biz_date: string;
+  date: string;
+  todayKeyword: string;
+  yesterdaysKeyword: string;
+  yesterdaysdate: string;
+  setTodayKeyword: (todayKeyword: string) => void;
+  setYesterdaysKeyword: (yesterdaysKeyword: string) => void;
+  setKeywordId: (keyword_id: string) => void;
+  setBiz_date: (biz_date: string) => void;
+  setYesterdaydate: (yesterdaydate: string) => void;
+  setdate: (date: string) => void;
 }
-interface Find{
-  sort:"random"|"lastest"
-  setsort: (sort: "random"|"lastest") => void;
+interface Find {
+  sort: "random" | "latest";
+  sort2:"me"|"all";
+  setsort2: (sort2: "me"|"all") => void;
+  setsort: (sort: "random" | "latest") => void;
 }
- export const useFindStore = create<Find>((set) => ({
+export const useFindStore = create<Find>((set) => ({
   sort: "random",
-  setsort: (sort) => set(() => ({ sort }))
+  sort2:"all",
+  setsort2: (sort2) => set(() => ({ sort2 })),
+  setsort: (sort) => set(() => ({ sort })),
 }));
 const usePromptStore = create<PromptStore>((set) => ({
-  keyword_id: null,
+  keyword_id: "1",
   biz_date: "9999",
-  date:null,
+  date: "1111",
   todayKeyword: "关键词",
   yesterdaysKeyword: "关键词",
-  yesterdaysdate: null,
+  yesterdaysdate: "1111",
   setTodayKeyword: (todayKeyword) => set(() => ({ todayKeyword })),
   setKeywordId: (keyword_id) => set(() => ({ keyword_id })),
-  setBiz_date:(biz_date) => set(() => ({ biz_date })),
-  setYesterdaysKeyword: (yesterdaysKeyword) => set(() => ({ yesterdaysKeyword })),
-  setYesterdaydate: (yesterdaydate) => set(() => ({ yesterdaysdate: yesterdaydate })),
-  setdate: (date) => set(() => ({ date }))
+  setBiz_date: (biz_date) => set(() => ({ biz_date })),
+  setYesterdaysKeyword: (yesterdaysKeyword) =>
+    set(() => ({ yesterdaysKeyword })),
+  setYesterdaydate: (yesterdaydate) =>
+    set(() => ({ yesterdaysdate: yesterdaydate })),
+  setdate: (date) => set(() => ({ date })),
 }));
 export default usePromptStore;
