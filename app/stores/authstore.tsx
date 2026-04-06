@@ -1,36 +1,25 @@
-import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
-import { Alert } from 'react-native';
-interface AuthState {
-  isLoggedIn: boolean;
-  checkAuth: () => Promise<void>; 
-  logout: () => Promise<void>; 
+import { create } from "zustand";
+interface Mystore{
+    nickname: string;
+    setNickname: (nickname: string) => void;
 }
-
-export const useAuthStore=create<AuthState>((set)=>({
-    isLoggedIn:false,
-    checkAuth:async ()=>{
-        try{
-            const token=await SecureStore.getItemAsync('access_token')
-            if(token)
-            {
-                set({isLoggedIn:true})
-            }
-        }
-        catch(error)
-        {
-            console.error('检查登陆状态失败',error)
-            set({isLoggedIn:false})
-        }
-    },
-    logout:async()=>{
-        try{
-            await SecureStore.deleteItemAsync('mytoken')
-            set({isLoggedIn:false})
-        }
-        catch(error)
-        {
-            console.error('退出登录失败',error)
-        }
-    }
-}))
+ export const useMyStore = create<Mystore>((set) => ({
+    nickname: "",
+    setNickname: (nickname) => set(() => ({ nickname })),
+}));
+interface setting{
+    public_pool_enabled:boolean;
+    reaction_enabled: boolean;
+    creation_reminder_enabled: boolean;
+    setPublicPoolEnabled: (enabled: boolean) => void;
+    setReactionEnabled: (enabled: boolean) => void; 
+    setCreationReminderEnabled: (enabled: boolean) => void;
+}
+export const useSettingStore = create<setting>((set) => ({
+    public_pool_enabled: false,
+    reaction_enabled: true, 
+    creation_reminder_enabled: false,
+    setPublicPoolEnabled: (enabled) => set(() => ({ public_pool_enabled: enabled })),
+    setReactionEnabled: (enabled) => set(() => ({ reaction_enabled: enabled })), 
+    setCreationReminderEnabled: (enabled) => set(() => ({ creation_reminder_enabled: enabled })),
+}));
