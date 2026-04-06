@@ -1,31 +1,32 @@
 import React, { useEffect } from "react";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { StyleSheet } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useRouter,Tabs } from "expo-router";
 
-import Icon3 from "../../assets/images/tabicon3.svg"
+import Icon3 from "../../assets/images/mine b.svg"
+import Icon3_1 from "../../assets/images/mine a.svg"
+import Icon1 from "../../assets/images/review b.svg"
+import Icon1_1 from "../../assets/images/review a.svg"
+import Icon2 from "../../assets/images/today b.svg"
+import Icon2_1 from "../../assets/images/today a.svg"
+
+
 type TabParamList = {
   today: undefined;
   remember: undefined;
   home: undefined;
 }
-function TabbarIcon(props: any) {
-  return<Icon3 {...props} />
-}
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
  const router=useRouter();
 
   const handleTabPress = async (name: keyof TabParamList) => {
-    if (name === "home") {
+    if (name === "home"||name==="remember") {
       const access_token = await SecureStore.getItemAsync("access_token");
       if (!access_token) {
       router.navigate("/signin");
       return false;
     } else {
-      router.navigate("/home");
+      router.navigate(`/${name}`);
       }
     }
     return true;
@@ -37,7 +38,6 @@ export default function TabLayout() {
       screenOptions={{
         tabBarStyle: styles.tabbarstyle,
         tabBarActiveTintColor: "#72B6FF"
-        
       }}
       screenListeners={{
         tabPress: (e) => {
@@ -53,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: "今日",
           headerShown: false,
-          tabBarIcon:({color})=><TabbarIcon color={color}/>
+          tabBarIcon:({focused})=>( focused?<Icon1_1 />:<Icon1/>)
         }}
 
       />
@@ -63,7 +63,7 @@ export default function TabLayout() {
         options={{
           title: "回顾",
           headerShown: false,
-          tabBarIcon:({color})=><TabbarIcon color={color}/>
+          tabBarIcon:({focused})=>( focused?<Icon2_1 />:<Icon2/>)
         }}
       />
       <Tabs.Screen
@@ -71,7 +71,7 @@ export default function TabLayout() {
         options={{
           title: "我的",
           headerShown: false,
-          tabBarIcon:({color})=><TabbarIcon color={color}/>
+          tabBarIcon:({focused})=>( focused?<Icon3_1 />:<Icon3/>)
         }}
       />
     </Tabs>
