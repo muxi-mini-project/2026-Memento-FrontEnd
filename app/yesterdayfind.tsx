@@ -1,35 +1,34 @@
-import ChangeButton from "@/components/changebutton";
-import { PostCard } from "@/components/postcard";
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import { useNavigation } from "expo-router";
-import React, { useEffect, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  Pressable,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  RefreshControl,
 } from "react-native";
+import { PostCard } from "@/components/postcard";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
-import Post from "./api/interface";
-import { listOfficialDateUploads } from "./api/keywords";
+import ChangeButton from "@/components/changebutton";
 import usePromptStore, { useFindStore } from "./stores/usePromptStore";
+import { listOfficialDateUploads } from "./api/keywords";
+import Post from "./api/interface";
 const { width: screenWidth } = Dimensions.get("window");
 
-export default function KeywordTodayScreen() {
+export default function KeywordYesterdayScreen() {
   const sort = useFindStore((state) => state.sort);
-  const date = usePromptStore((state) => state.date);
+  const yesterdaysdate = usePromptStore((state) => state.yesterdaysdate);
   const [item, setItem] = useState<Post[]>([]);
   // 新增：刷新状态管理
   const [refreshing, setRefreshing] = useState(false);
 
   const getPublicList = async () => {
     try {
-      console.log(date, sort);
-      const res = await listOfficialDateUploads(date, sort);
-      setItem(res.data.items || []);
+      const res = await listOfficialDateUploads(yesterdaysdate, sort);
+      setItem(res.data.items);
       console.log(res.data.items);
     } catch (error) {
       console.error("获取数据失败：", error);
@@ -38,7 +37,7 @@ export default function KeywordTodayScreen() {
 
   useEffect(() => {
     getPublicList();
-  }, [sort, date]);
+  }, [sort, yesterdaysdate]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -46,7 +45,7 @@ export default function KeywordTodayScreen() {
     setRefreshing(false);
   };
 
-  const keyword = usePromptStore((state) => state.todayKeyword);
+  const keyword = usePromptStore((state) => state.yesterdaysKeyword);
   const navigation = useNavigation();
 
   const handleGoBack = () => {
@@ -64,7 +63,7 @@ export default function KeywordTodayScreen() {
       <View style={styles.container}>
         {/* 头部导航栏 */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>今日关键词</Text>
+          <Text style={styles.headerTitle}>昨日关键词</Text>
           <Text style={styles.keywordText}>{keyword}</Text>
           <Pressable style={styles.buttonGroup} onPress={handleGoBack}>
             <Arrowback></Arrowback>
@@ -79,14 +78,15 @@ export default function KeywordTodayScreen() {
           renderItem={({ item }) => <PostCard post={item} />}
           style={styles.postList}
           showsVerticalScrollIndicator={true}
+          
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#72B6FF"]}
-              tintColor="#72B6FF"
-              title="正在刷新..."
-              titleColor="#999"
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              colors={["#72B6FF"]} 
+              tintColor="#72B6FF" 
+              title="正在刷新..." 
+              titleColor="#999" 
             />
           }
         />
