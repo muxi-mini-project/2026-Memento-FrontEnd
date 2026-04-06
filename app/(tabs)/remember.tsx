@@ -1,41 +1,129 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 import {
-  View,
+  Pressable,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Pressable,
+  View,
 } from "react-native";
-import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Ionicons}  from "@expo/vector-icons";
+import { ReviewDatesResponse, ReviewkeywordItem } from "../api/interface";
+import { listReviewDates, listReviewKeywords } from "../api/review";
 
-const keywords = [
-  "安静",
-  "快乐",
-  "思念",
-  "孤独",
-  "希望",
-  "回忆",
+const keywordColors = [
+  "#B7E0FE",
+  "#CFE9DC",
+  "#FBEDCA",
+  "#FFDCA4",
+  "#FEDEE1",
+  "#B7E0FE",
 ];
 
-const keywordColors = {
-  安静: "#B7E0FE",
-  快乐: "#CFE9DC",
-  思念: "#FBEDCA",
-  孤独: "#FFDCA4",
-  希望: "#FEDEE1",
-  回忆: "#B7E0FE",
-};//后续颜色前五个一循环
-
-
 export default function FindScreen() {
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
   const [activeTab, setActiveTab] = useState("keyword");
+  const [reviewData, setReviewData] = useState<ReviewDatesResponse>();
+  const [keywordData, setKeywordData] = useState<ReviewkeywordItem[]>([]);
 
   const handleChange = (tab: string) => {
     setActiveTab(tab);
   };
+  const formatDate = (dateStr: string) => {
+    if (!dateStr || !dateStr.includes("-")) {
+      return dateStr;
+    }
+    const [year, month, day] = dateStr.split("-");
+    const formattedMonth = Number(month).toString();
+    const formattedDay = Number(day).toString();
+    return `${year}/${formattedMonth}/${formattedDay}`;
+  };
+  const getReviewdateList = async () => {
+    try {
+      const token = SecureStore.getItemAsync("access_token");
+      console.log(token);
+      const res = await listReviewDates();
+      setReviewData(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getReviewKeywordList = async () => {
+    try {
+      const res = await listReviewKeywords();
+      setKeywordData(res.data.items);
+      console.log(res.data.items);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  useEffect(() => {
+    getReviewdateList();
+    getReviewKeywordList();
+  }, []);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getReviewdateList();
+    setRefreshing(false);
+  };
+  if (reviewData === null || keywordData === null) {
+    return (
+      <SafeAreaProvider style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headertitle}>
+            <Text style={styles.title}>回顾</Text>
+          </View>
+          <View style={styles.changekuang}>
+            <TouchableOpacity
+              onPress={() => handleChange("keyword")}
+              style={styles.tabItem}
+            >
+              <Text
+                style={[
+                  styles.changetext,
+                  activeTab === "keyword" && styles.activeText,
+                ]}
+              >
+                关键词
+              </Text>
+              <View
+                style={[
+                  styles.tabLine,
+                  activeTab === "keyword" && styles.activeLine,
+                ]}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleChange("date")}
+              style={styles.tabItem}
+            >
+              <Text
+                style={[
+                  styles.changetext,
+                  activeTab === "date" && styles.activeText,
+                ]}
+              >
+                日期
+              </Text>
+              <View
+                style={[
+                  styles.tabLine,
+                  activeTab === "date" && styles.activeLine,
+                ]}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
   return (
     <SafeAreaProvider style={styles.container}>
       <View style={styles.header}>
@@ -89,36 +177,60 @@ export default function FindScreen() {
         <ScrollView
           style={styles.cardList}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#72B6FF"]}
+              tintColor="#72B6FF"
+              title="正在刷新..."
+              titleColor="#999"
+            />
+          }
         >
-          {keywords.map((keyword, index) => (
+          {keywordData.map((item, index) => (
             <View
               key={index}
               style={[
                 styles.cardItem,
                 {
-                  backgroundColor:
-                    keywordColors[keyword as keyof typeof keywordColors] ||
-                    "#E0E0E0",
-                  marginTop: index > 0 ? -295 : 0,
-                  zIndex: keywords.length + index,
+                  backgroundColor: keywordColors[index % 5] || "#E0E0E0",
+                  marginTop: index > 0 ? -44 : 0,
+                  zIndex: keywordData.length + index,
                 },
               ]}
             >
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{keyword}</Text>
+                <Text style={styles.cardTitle}>{item.keyword.text}</Text>
                 <Pressable
-                  style={styles.detailArrow}
+                  style={styles.detailArrowmore}
                   onPress={() => {
-                    console.log(`点击了关键词：${keyword}`);
+                    router.navigate({
+                      pathname: "/reviewFind/keywordsClass",
+                      params: {
+                        keyword_id: item.keyword.id,
+                        keywordtext: item.keyword.text,
+                      },
+                    });
                   }}
                 >
                   <Ionicons name="arrow-forward" size={20} color="#666" />
                 </Pressable>
               </View>
-              <Text style={styles.cardSubtitle}>xxx张作品</Text>
+              <View style={styles.cardSubtitle}>
+                <Text style={{ color: "#999", fontSize: 12 }}>
+                  {item.my_upload_count}张作品
+                </Text>
+              </View>
             </View>
           ))}
-          <View>
+          <View
+            style={{
+              marginTop: 20,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Text>已经浏览完全部创作过的关键词</Text>
           </View>
         </ScrollView>
@@ -126,39 +238,73 @@ export default function FindScreen() {
         <ScrollView
           style={styles.cardList}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#72B6FF"]}
+              tintColor="#72B6FF"
+              title="正在刷新..."
+              titleColor="#999"
+            />
+          }
         >
           <View style={styles.cardheader}>
             <View>
               <Text style={{ color: "#999", fontSize: 14 }}>累计参与</Text>
               <View style={styles.cardheaderdata}>
-                <Text style={{ fontSize: 36 }}>XXX</Text>
+                <Text style={{ fontSize: 36 }}>
+                  {reviewData?.total_participation_days}
+                </Text>
                 <Text style={{ fontSize: 16, color: "#999" }}>天</Text>
               </View>
             </View>
             <View>
               <Text style={{ color: "#999", fontSize: 14 }}>作品总数</Text>
               <View style={styles.cardheaderdata}>
-                <Text style={{ fontSize: 36 }}>XXX</Text>
+                <Text style={{ fontSize: 36 }}>
+                  {reviewData?.total_image_count}
+                </Text>
                 <Text style={{ fontSize: 16, color: "#999" }}>张</Text>
               </View>
             </View>
           </View>
-          {keywords.map((keyword, index) => (
+          {reviewData?.items.map((item, index) => (
             <View key={index} style={styles.carddate_Item}>
-              <Text style={styles.cardkeyword}>{keyword}</Text>
+              <Text style={styles.cardkeyword}>{item.keyword.text}</Text>
 
-              <Pressable style={[styles.detailArrowmore,styles.detailArrow]} onPress={()=>{
-                console.log( `查看${keyword}详情`);
-                
-              }}>
+              <Pressable
+                style={[styles.detailArrowmore, { top: 62 }]}
+                onPress={() => {
+                  router.navigate({
+                    pathname: "/reviewFind/dateClass",
+                    params: {
+                      biz_date: item.biz_date,
+                      keywordtext: item.keyword.text,
+                    },
+                  });
+                }}
+              >
                 <Ionicons name="arrow-forward" size={20} color="#666" />
               </Pressable>
               <View style={styles.cardnumber}>
-                <Text>xxx张作品</Text>
+                <Text style={{ color: "#666", fontSize: 12 }}>
+                  {item.my_image_count === null ? "0" : item.my_image_count}
+                  张作品
+                </Text>
               </View>
-              <Text style={styles.carddate}>20xx/x/xx</Text>
+              <Text style={styles.carddate}>{formatDate(item.biz_date)}</Text>
             </View>
           ))}
+          <View
+            style={{
+              marginTop: 20,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text>已经回到最早的一天</Text>
+          </View>
         </ScrollView>
       )}
     </SafeAreaProvider>
@@ -226,7 +372,7 @@ const styles = StyleSheet.create({
   },
   cardItem: {
     borderRadius: 30,
-    height: 395,
+    height: 144,
     position: "relative",
   },
   cardContent: {
@@ -237,20 +383,21 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 22,
-    fontWeight: "bold",
-  },
-  detailArrow: {
-    width: 28,
-    height: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 14,
-    backgroundColor: " rgba(255, 255, 255, 0.5)",
+    fontWeight: 500,
+    color: "#666666",
   },
   cardSubtitle: {
     position: "absolute",
     top: 59,
     left: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 72,
+    paddingHorizontal: 12,
+    height: 22,
+    borderRadius: 10,
+    borderColor: " rgba(102, 102, 102, 0.5)",
+    borderWidth: 1,
   },
   cardheader: {
     height: 100,
@@ -265,6 +412,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     alignItems: "flex-end",
+    justifyContent: "flex-start",
+    height: 52,
   },
   carddate_Item: {
     position: "relative",
@@ -273,9 +422,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: "row",
     marginTop: 20,
-    gap: 202,
-    paddingTop:56,
-    paddingLeft:26
+    paddingTop: 56,
+    paddingLeft: 26,
   },
   carddate: {
     position: "absolute",
@@ -288,21 +436,27 @@ const styles = StyleSheet.create({
     position: "absolute",
     minWidth: 72,
     height: 22,
-    justifyContent: "center",
-    alignItems: "center",
     top: 24,
     right: 23,
-    paddingHorizontal: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 6,
     borderColor: "rgba(102, 102, 102, 0.5)",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 999,
   },
   cardkeyword: {
     fontSize: 24,
   },
-  detailArrowmore:{
-    borderWidth:1,
-    borderColor:"#EFEFEF",
-    borderRadius:10,
-  }
+  detailArrowmore: {
+    position: "absolute",
+    top: 18,
+    right: 27.28,
+    borderRadius: 14,
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#EFEFEF",
+  },
 });
