@@ -108,13 +108,23 @@ export interface coverImage{
     };
   }
 }
+export interface Notificover{
+   id: string;
+  variants: {
+    square_small: {
+      url: string;
+      width: number;
+      height: number;
+    };
+  }
+}
  export interface notfiItem{
   id: string;
   actor_user_id: string;
   actor_avatar_url: string;
   type: string;
   upload_id: string;
-  cover_image: coverImage|null;
+  cover_image: Notificover;
   reaction_type: string;
   created_at: string;
   read_at: string;
