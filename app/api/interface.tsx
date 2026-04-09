@@ -96,7 +96,7 @@ export interface customKeywords{
   target_image_count: number;
   total_image_count: number;
   my_image_count: number;
-  cover_image: coverImage|null;
+  cover_image: Notificover|null;
 }
 export interface coverImage{
   id: string;
@@ -129,4 +129,35 @@ export interface Notificover{
   created_at: string;
   read_at: string;
 }
+export interface CustomImage{
+  cover_source: string;
+  cover_image?: cover_image;
+  items: CustomImageItem[];
+}
+export interface cover_image{
+  id: string;
+  variants: {
+    original: {
+      url: string;
+      width: number;
+      height: number;
+    };
+  }
+}
+export interface CustomImageItem{
+  id: string;
+  image: {
+    id: string;
+    variants: {
+      square_medium: {
+        url: string;
+        width: number;
+        height: number;
+      };
+    };
+  }, 
+  display_order: number;
+  created_at: string;
+}
+
 
