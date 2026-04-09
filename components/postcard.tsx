@@ -1,9 +1,7 @@
 import Post from "@/app/api/interface";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dimensions,
-  FlatList,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -20,80 +18,93 @@ import HeartLight from "../assets/images/heartlight.svg";
 import Sound from "../assets/images/sound1.svg";
 import Ablum from "../assets/images/ablum.svg";
 import { ImageBackground } from "expo-image";
+import { putReaction, deleteReaction } from "@/app/api/keywords";
+
 const { width: screenWidth } = Dimensions.get("window");
-
-const generateIdempotencyKey = () => {
-  return `react_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-// 封装点赞/取消点赞的 API 请求
-const reactToUpload = async (
-  uploadId: string,
-  reactionType: "inspired" | "resonated",
-) => {
-  const idempotencyKey = generateIdempotencyKey();
-  try {
-    const token = SecureStore.getItemAsync("access_token");
-    const response = await fetch(
-      `http://47.104.25.166:8080/v1/reactions/uploads/${uploadId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          reaction_type: reactionType,
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("请求失败");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("reactToUpload error:", error);
-    throw error;
-  }
-};
 
 export function PostCard({ post }: { post: Post }) {
   const router = useRouter();
-  const [myReactions, setMyReactions] = useState<string[]>(
-    post.my_reactions || [],
-  );
+  const [myReactions, setMyReactions] = useState<string[]>(post.my_reactions || []);
 
-  // 切换「有启发」反应
-  const toggleInspiration = async () => {
-    const newReactions = myReactions.includes("inspired")
-      ? myReactions.filter((r) => r !== "inspired") // 取消
-      : [...myReactions, "inspired"]; // 点赞
-    setMyReactions(newReactions);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isRequestingRef = useRef<{
+    inspired?: boolean;
+    resonated?: boolean;
+  }>({});
 
+  const doReact = async (
+    uploadId: string,
+    reactionType: "inspired" | "resonated",
+    isAdd: boolean
+  ) => {
     try {
-      await reactToUpload(String(post.id), "inspired");
+      let res;
+      if (isAdd) {
+        res = await putReaction(uploadId, reactionType);
+      } else {
+        res = await deleteReaction(uploadId, reactionType);
+      }
+
+      if (res.status === 204 || res.status === 200) {
+        return true;
+      } else {
+        console.error("reaction error", res.status);
+        return false;
+      }
     } catch (error) {
-      // 请求失败时回滚状态
-      setMyReactions(post.my_reactions || []);
-      Alert.alert("操作失败", "请稍后重试");
+      console.error("doReact 捕获异常:", error);
+      return false;
     }
   };
 
-  // 切换「有共鸣」反应
-  const toggleEmpathy = async () => {
-    const newReactions = myReactions.includes("resonated")
-      ? myReactions.filter((r) => r !== "resonated")
+  const toggleInspired = () => {
+    const isActive = myReactions.includes("inspired");
+    const next = isActive
+      ? myReactions.filter(r => r !== "inspired")
+      : [...myReactions, "inspired"];
+
+    setMyReactions(next);
+
+    if (isRequestingRef.current.inspired) return;
+    clearTimeout(debounceRef.current!);
+
+    debounceRef.current = setTimeout(async () => {
+      isRequestingRef.current.inspired = true;
+      const ok = await doReact(String(post.id), "inspired", !isActive);
+      isRequestingRef.current.inspired = false;
+
+      if (!ok) {
+        setMyReactions(post.my_reactions || []);
+        Alert.alert("操作失败", "请稍后重试");
+      }
+    }, 300);
+  };
+
+  const toggleResonated = () => {
+    const isActive = myReactions.includes("resonated");
+    const next = isActive
+      ? myReactions.filter(r => r !== "resonated")
       : [...myReactions, "resonated"];
 
-    setMyReactions(newReactions);
+    setMyReactions(next);
 
-    try {
-      await reactToUpload(String(post.id), "resonated");
-    } catch (error) {
-      setMyReactions(post.my_reactions || []);
-      Alert.alert("操作失败", "请稍后重试");
-    }
+    if (isRequestingRef.current.resonated) return;
+    clearTimeout(debounceRef.current!);
+
+    debounceRef.current = setTimeout(async () => {
+      isRequestingRef.current.resonated = true;
+      const ok = await doReact(String(post.id), "resonated", !isActive);
+      isRequestingRef.current.resonated = false;
+
+      if (!ok) {
+        setMyReactions(post.my_reactions || []);
+        Alert.alert("操作失败", "请稍后重试");
+      }
+    }, 300);
   };
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current!);
+  }, []);
 
   return (
     <Pressable
@@ -135,7 +146,7 @@ export function PostCard({ post }: { post: Post }) {
       </Text>
 
       <View style={styles.interactionRow}>
-        <Pressable style={styles.interactionButton} onPress={toggleInspiration}>
+        <Pressable style={styles.interactionButton} onPress={toggleInspired}>
           {myReactions.includes("inspired") ? <HaveIdea /> : <HaveLightIdea />}
           <Text
             style={[
@@ -149,7 +160,7 @@ export function PostCard({ post }: { post: Post }) {
           </Text>
         </Pressable>
 
-        <Pressable style={styles.interactionButton} onPress={toggleEmpathy}>
+        <Pressable style={styles.interactionButton} onPress={toggleResonated}>
           {myReactions.includes("resonated") ? <Heart /> : <HeartLight />}
           <Text
             style={[

@@ -60,3 +60,18 @@ export const getOfficialUploadDetail = (upload_id: string) => {
     method: "GET",
   });
 };
+export const putReaction = (upload_id: string, reaction: "inspired" | "resonated") => {
+  return request({
+    url: `/v1/reactions/uploads/${upload_id}`,
+    method: "PUT",
+    data: {
+      type: reaction,
+    },
+  });
+};
+export const deleteReaction = (upload_id: string, type: "inspired" | "resonated") => {
+  return request({
+    url: `/v1/reactions/uploads/${upload_id}/${type}`,
+    method: "DELETE",
+  });
+};
