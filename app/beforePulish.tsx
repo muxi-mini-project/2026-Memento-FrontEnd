@@ -69,7 +69,9 @@ const { width: screenWidth } = Dimensions.get("window");
 const ITEM_WIDTH = screenWidth * 0.85;
 
 const BeforePublish = () => {
-  const { photos } = useLocalSearchParams();
+  const type=useLocalSearchParams().type;
+  const photos=useLocalSearchParams().photos;
+  const keyword_id=useLocalSearchParams().keyword_id;
   console.log(photos);
 
   const navigation = useNavigation();
@@ -116,14 +118,25 @@ const BeforePublish = () => {
       return null;
     }
     try {
-      const res = await CreateSession({
+      let res: any;
+      if(type === "custom_keyword"){
+        res = await CreateSession({
         context: {
-          type: "official_today",
+          type: type,
+          custom_keyword_id: keyword_id as string ,
+        },
+        expected_image_count: photoList.length,
+      });
+      }else{
+      res = await CreateSession({
+        context: {
+          type: type as string,
           official_keyword_id: keywordId,
           biz_date: bizDate,
         },
         expected_image_count: photoList.length,
       });
+    }
       const sid = res.data.session_id;
       return sid;
     } catch (err) {
@@ -153,7 +166,6 @@ const BeforePublish = () => {
           client_image_id: m.clientId,
           image_content_type: `image/${imgExt}`,
           image_content_length: imgSize,
-          // image_sha256: null,
           audio_content_type: audioType ? `audio/${audioType}` : null,
           audio_content_length: audioSize ? audioSize : null,
         });
@@ -184,7 +196,6 @@ const BeforePublish = () => {
         // 传图片
         if (item.image_upload) {
           const blob = await fetch(x.uri).then((r) => r.blob());
-          console.log("到底是什么", blob);
           const resp = await axios({
             method: item.image_upload.method,
             url: item.image_upload.url,
@@ -193,15 +204,9 @@ const BeforePublish = () => {
           maxContentLength: -1,
             data: blob,
           });
-          console.log("kkkkkkk", resp);
-          console.log("gggggggg",resp.config.method);
-          
-
           imgEtag =
             resp.headers.etag || resp.headers.ETag || resp.headers["Etag"];
           imgEtag = imgEtag.replace(/^"|"$/g, "");
-          console.log("ETAG", imgEtag);
-
           if (imgEtag === "") {
             throw new Error("图片上传失败：未获取到 ETag");
           }
@@ -482,7 +487,6 @@ const BeforePublish = () => {
   const currentPhoto =
     currentActiveIndex >= 0 ? photoList[currentActiveIndex] : null;
 
-  // ==================== UI渲染 ====================
   return (
     <SafeAreaProvider style={styles.container}>
       <View style={styles.header}>
