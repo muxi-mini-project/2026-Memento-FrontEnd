@@ -66,7 +66,6 @@ export default function Configure() {
 
   // 退出登录
   const handleout = async () => {
-    await SecureStore.deleteItemAsync("refresh_token");
     await SecureStore.deleteItemAsync("access_token");
     await SecureStore.deleteItemAsync("user_id");
     await SecureStore.deleteItemAsync("user_name");

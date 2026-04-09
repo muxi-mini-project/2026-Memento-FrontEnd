@@ -41,10 +41,9 @@ export default function SignIn() {
       const res = await loginPwd(email, password);
       console.log(res.data);
       if (res.status === 200) {
-        const { access_token, refresh_token, expires_in, token_type } =
+        const { access_token,  expires_in, token_type } =
           res.data;
         await SecureStore.setItemAsync("access_token", access_token);
-        await SecureStore.setItemAsync("refresh_token", refresh_token);
         await SecureStore.setItemAsync("expires_in", expires_in.toString());
         await SecureStore.setItemAsync("token_type", token_type);
         navigation.navigate("index" as never);
@@ -72,9 +71,8 @@ export default function SignIn() {
     }
     const res = await loginPhone(email, code);
     if (res.status === 200) {
-      const { access_token, refresh_token, expires_in, token_type } = res.data;
+      const { access_token, expires_in, token_type } = res.data;
       await SecureStore.setItemAsync("access_token", access_token);
-      await SecureStore.setItemAsync("refresh_token", refresh_token);
       await SecureStore.setItemAsync("expires_in", expires_in.toString());
       await SecureStore.setItemAsync("token_type", token_type);
       navigation.navigate("index" as never);
