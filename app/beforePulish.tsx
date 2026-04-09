@@ -364,8 +364,11 @@ const BeforePublish = () => {
       quality: 1,
     });
     if (!res.canceled) {
+       const maxId = photoList.length > 0 
+      ? Math.max(...photoList.map(item => Number(item.id))) 
+      : -1;
       const newArr: PhotoItem[] = res.assets.map((a, i) => ({
-        id: i,
+        id: maxId + 1 + i,
         uri: a.uri,
         width: a.width || 0,
         height: a.height || 0,
@@ -505,9 +508,9 @@ const BeforePublish = () => {
               alignItems: "center",
               justifyContent: "center",
               position: "absolute",
-              gap: 12,
+              gap:7,
               left: 24,
-              top: 50,
+              // top: 0,
               shadowColor: "#000",
               shadowOffset: { width: 4, height: 10 },
               shadowOpacity: 0.1,
@@ -517,8 +520,9 @@ const BeforePublish = () => {
             <Pressable onPress={() => navigation.goBack()}>
               <Text style={{ color: "#FE585B", fontSize: 12 }}>不保留返回</Text>
             </Pressable>
+            <View style={{width:97,height:0,borderTopColor:"#EEEEEE",borderTopWidth:1}}></View>
             <Pressable onPress={() => setBackAlert(false)}>
-              <Text>保留编辑</Text>
+              <Text style={{ color: "#3D3D3D", fontSize: 12 }}>保留编辑</Text>
             </Pressable>
           </View>
         )}
@@ -544,14 +548,14 @@ const BeforePublish = () => {
             <Pressable
               style={[
                 styles.coverbtn1,
-                currentPhoto?.isCover && { backgroundColor: "#72B6FF" },
+                currentPhoto?.isCover && { backgroundColor: "#72B6FF" ,width:50},
               ]}
               onPress={() =>
                 currentActiveIndex >= 0 && handleSetCover(currentActiveIndex)
               }
             >
               <Text style={{ color: "#fff" }}>
-                {currentPhoto?.isCover ? "已设为封面" : "设为封面"}
+                {currentPhoto?.isCover ? "封面" : "设为封面"}
               </Text>
             </Pressable>
 
@@ -620,6 +624,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
     alignItems: "center",
     paddingTop: 56,
+    position: "relative",
   },
   header: {
     flexDirection: "row",
