@@ -12,12 +12,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Memento from "../../assets/images/memento.svg";
 import { PhotoWay, TakePhotoWay } from "../../components/createWay_1";
 import { Idea } from "@/components/Idea";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { PhotoObject } from "../api/interface";
 import { getKeywords, getoffcialHome } from "../api/keywords";
 import usePromptStore from "../stores/usePromptStore";
 import TalkKuang from "../../assets/images/talkkuang.svg";
+import axios from "axios";
 export default function TabTwoScreen() {
+  const router = useRouter()
   const [dailysentence, setDailysentence] =
     useState("很多快乐来不及命名,只被当作日常");
   const [keyWords_text, setKeyWords_text] = useState(" 关键词");

@@ -8,8 +8,9 @@ import {
   Image,
   Modal,
   TextInput,
+  FlatList,
+  RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import Edit from "../../assets/images/edit.svg";
@@ -27,6 +28,8 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const [mask, setMask] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  
   const [mydata, setMydata] = useState<mydataItem>({
     nickname: "",
     avatar_url: "",
@@ -36,6 +39,7 @@ export default function HomeScreen() {
     custom_keywords: [],
   });
   const setNickname = useMyStore((state) => state.setNickname);
+
   useEffect(() => {
     const getMydata = async () => {
       const res = await getMedata();
@@ -55,12 +59,13 @@ export default function HomeScreen() {
     custom_keywords,
   } = mydata;
   setNickname(nickname);
-const getCustomlist=async()=>{
-const res=await getCustomKeywordList();
-return res.data;
-}
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getCustomKeywordList();
+    setRefreshing(false);
+  };
   return (
-    <ScrollView>
+    <View>
       <View style={styles.container}>
         <Pressable
           style={[styles.ConfigureIcon, { right: 74 }]}
@@ -125,27 +130,36 @@ return res.data;
           <Text>自定义关键词</Text>
           <NewCreate></NewCreate>
         </View>
-        <ScrollView>
-          {custom_keywords.map((item, index) => {
-            let Aim = false;
-            if (item.target_image_count > 0) {
-              Aim = true;
-            }
-            return (
-              <HomeCard
-                key={item.id}
-                hasAim={Aim}
-                target={item.target_image_count}
-                progress={item.my_image_count}
-                title={item.text}
-                cover={item.cover_image}
-              ></HomeCard>
-            );
-          })}
-        </ScrollView>
+<FlatList
+  data={custom_keywords}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => {
+    let hasAim = item.target_image_count > 0;
+    return (
+      <HomeCard
+      keyword_id={item.id}
+        hasAim={hasAim}
+        target={item.target_image_count}
+        progress={item.my_image_count}
+        title={item.text}
+        cover={item.cover_image}
+      />
+    )
+  }}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      colors={["#72B6FF"]}
+      tintColor="#72B6FF"
+      title="正在刷新..."
+      titleColor="#999"
+    />
+  }
+/>
         <Goodmm style={styles.Goodmm}></Goodmm>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
