@@ -4,6 +4,7 @@ import React from "react";
 import { Pressable, Text, View, StyleSheet, Alert } from "react-native";
 import { PhotoObject } from "../app/api/interface";
 import { logger } from "react-native-reanimated/lib/typescript/common";
+import usePromptStore from "@/app/stores/usePromptStore";
 export function TakePhotoWay() {
   // 打开相机
    const router=useRouter();
@@ -24,8 +25,7 @@ export function TakePhotoWay() {
       Alert.alert("拍摄成功", `已获取照片：${result.assets[0].uri.substring(0, 20)}...`);
     }
     router.navigate({
-      pathname: "/beforepulish",
- 
+      pathname: "/beforePulish",
     });
   };
 
@@ -43,6 +43,7 @@ interface PhotoWayProps {
 export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
     const router=useRouter();
   // 打开相册
+  const keyword_id=usePromptStore(state => state.keyword_id);
   const handleOpenGallery = async () => {
     // 申请相册权限
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -74,9 +75,11 @@ export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
       }
       console.log("子组件选中的照片列表:", selectedPhotos);      
     router.navigate({
-      pathname: "/beforepulish",
+      pathname: "/beforePulish",
         params: {
-        photos: JSON.stringify(selectedPhotos)
+          type:"official_today",
+        photos: JSON.stringify(selectedPhotos),
+        keyword_id:keyword_id,
       }
     })
       
