@@ -1,28 +1,25 @@
 import * as ImagePicker from "expo-image-picker";
 
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   FlatList,
   ImageBackground,
-  Modal,
   Pressable,
   RefreshControl,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
-import ArrowRight from "../assets/images/arrow-auth.svg";
 
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Arrowback from "../assets/images/arrow-back.svg";
-import { CustomImage, CustomImageItem } from "./api/interface";
 import { listCustomKeywordImages } from "./api/custom";
+import { CustomImage, CustomImageItem } from "./api/interface";
 
-import CustomShow from "../components/customShow";
 import Add from "../assets/images/add.svg";
-import { PhotoObject } from "../app/api/interface";
+import CustomShow from "../components/customShow";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -76,10 +73,10 @@ export default function CustomPage() {
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        <View style={[styles.header,{backgroundColor:"#777676"}]}>
+        <View style={[styles.header, { backgroundColor: "#777676" }]}>
           {item?.cover_image && (
             <ImageBackground
-              source={{ uri: item.cover_image.variants.original.url }}
+              source={{ uri: item.cover_image.variants.detail_large.url }}
               style={styles.headerBg}
               resizeMode="cover"
             />
@@ -92,11 +89,11 @@ export default function CustomPage() {
             onPress={() => {
               router.navigate({
                 pathname: "/chooseCover",
-                params:{
-                   images: JSON.stringify(item.items),
-                   keyword_id: keyword_id,
-                }
-              })
+                params: {
+                  images: JSON.stringify(item.items),
+                  keyword_id: keyword_id,
+                },
+              });
             }}
             style={styles.changeCover}
           >
@@ -186,7 +183,6 @@ export default function CustomPage() {
       >
         <Add />
       </Pressable>
-
     </SafeAreaProvider>
   );
 }

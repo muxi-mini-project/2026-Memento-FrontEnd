@@ -16,7 +16,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import Voicecocle from "../assets/images/voiceConcel.svg"
+import { KeyboardAwareScrollView,KeyboardProvider } from "react-native-keyboard-controller";
 import AddPhotos from "../assets/images/addphoto.svg";
 import Arrow_back from "../assets/images/arrow-back.svg";
 import Sound from "../assets/images/sound.svg";
@@ -69,9 +70,9 @@ const { width: screenWidth } = Dimensions.get("window");
 const ITEM_WIDTH = screenWidth * 0.85;
 
 const BeforePublish = () => {
-  const type=useLocalSearchParams().type;
-  const photos=useLocalSearchParams().photos;
-  const keyword_id=useLocalSearchParams().keyword_id;
+  const type = useLocalSearchParams().type;
+  const photos = useLocalSearchParams().photos;
+  const keyword_id = useLocalSearchParams().keyword_id;
   console.log(photos);
 
   const navigation = useNavigation();
@@ -84,7 +85,6 @@ const BeforePublish = () => {
 
   const keywordId = usePromptStore((state) => state.keyword_id);
   const bizDate = usePromptStore((state) => state.date);
-  // 获取文件大小
   const getFileSize = useCallback(async (uri: string) => {
     try {
       const res = await fetch(uri);
@@ -94,8 +94,6 @@ const BeforePublish = () => {
       return 0;
     }
   }, []);
-
-  // 合并图片和语言
   const getFullMediaParams = useMemo(() => {
     return photoList.map((item, idx) => ({
       clientId: String(item.id),
@@ -119,24 +117,24 @@ const BeforePublish = () => {
     }
     try {
       let res: any;
-      if(type === "custom_keyword"){
+      if (type === "custom_keyword") {
         res = await CreateSession({
-        context: {
-          type: type,
-          custom_keyword_id: keyword_id as string ,
-        },
-        expected_image_count: photoList.length,
-      });
-      }else{
-      res = await CreateSession({
-        context: {
-          type: type as string,
-          official_keyword_id: keywordId,
-          biz_date: bizDate,
-        },
-        expected_image_count: photoList.length,
-      });
-    }
+          context: {
+            type: type,
+            custom_keyword_id: keyword_id as string,
+          },
+          expected_image_count: photoList.length,
+        });
+      } else {
+        res = await CreateSession({
+          context: {
+            type: type as string,
+            official_keyword_id: keywordId,
+            biz_date: bizDate,
+          },
+          expected_image_count: photoList.length,
+        });
+      }
       const sid = res.data.session_id;
       return sid;
     } catch (err) {
@@ -171,8 +169,9 @@ const BeforePublish = () => {
         });
       }
       const res = await presignUpload(sid, reqItems);
-      console.log("____________________", res.data);
+      console.log('========oooo',reqItems);
       
+      console.log("____________________", res.data);
 
       return res.data["items"] as image_upload[];
     },
@@ -200,8 +199,8 @@ const BeforePublish = () => {
             method: item.image_upload.method,
             url: item.image_upload.url,
             headers: item.image_upload.headers,
-                     transformRequest: [(data) => data],
-          maxContentLength: -1,
+            transformRequest: [(data) => data],
+            maxContentLength: -1,
             data: blob,
           });
           imgEtag =
@@ -219,8 +218,8 @@ const BeforePublish = () => {
             method: item.audio_upload.method,
             url: item.audio_upload.url,
             headers: item.audio_upload.headers,
-           transformRequest: [(data) => data],
-          maxContentLength: -1,
+            transformRequest: [(data) => data],
+            maxContentLength: -1,
             data: blob,
           });
           audioEtag = resp.headers.etag || resp.headers.ETag;
@@ -364,9 +363,10 @@ const BeforePublish = () => {
       quality: 1,
     });
     if (!res.canceled) {
-       const maxId = photoList.length > 0 
-      ? Math.max(...photoList.map(item => Number(item.id))) 
-      : -1;
+      const maxId =
+        photoList.length > 0
+          ? Math.max(...photoList.map((item) => Number(item.id)))
+          : -1;
       const newArr: PhotoItem[] = res.assets.map((a, i) => ({
         id: maxId + 1 + i,
         uri: a.uri,
@@ -465,10 +465,10 @@ const BeforePublish = () => {
       if ("type" in item) {
         return (
           <Pressable
-            style={[styles.imageItemContainer, { backgroundColor: "#EEE" }]}
+            style={[styles.imageItemContainer]}
             onPress={handleAddPhoto}
           >
-            <View style={styles.addIconContainer}>
+            <View style={[styles.addIconContainer]}>
               <AddPhotos />
             </View>
           </Pressable>
@@ -490,140 +490,164 @@ const BeforePublish = () => {
   const currentPhoto =
     currentActiveIndex >= 0 ? photoList[currentActiveIndex] : null;
 
-  return (
-    <SafeAreaProvider style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => setBackAlert(true)} style={styles.goback}>
-          <Arrow_back />
-        </Pressable>
+return (
+  <KeyboardProvider>
+    <KeyboardAwareScrollView
+      bottomOffset={200}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      style={styles.container}
+    >
+      <View style={[styles.container,{  alignItems: "center",    paddingTop: 56,}]}>
+        {/* 头部 */}
+        <View style={styles.header}>
+          <Pressable onPress={() => setBackAlert(true)} style={styles.goback}>
+            <Arrow_back />
+          </Pressable>
 
-        {backAlert && (
-          <View
-            style={{
-              width: 113,
-              height: 60,
-              borderRadius: 12,
-              backgroundColor: "#fff",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "absolute",
-              gap:7,
-              left: 24,
-              // top: 0,
-              shadowColor: "#000",
-              shadowOffset: { width: 4, height: 10 },
-              shadowOpacity: 0.1,
-              zIndex: 999,
-            }}
-          >
-            <Pressable onPress={() => navigation.goBack()}>
-              <Text style={{ color: "#FE585B", fontSize: 12 }}>不保留返回</Text>
-            </Pressable>
-            <View style={{width:97,height:0,borderTopColor:"#EEEEEE",borderTopWidth:1}}></View>
-            <Pressable onPress={() => setBackAlert(false)}>
-              <Text style={{ color: "#3D3D3D", fontSize: 12 }}>保留编辑</Text>
-            </Pressable>
-          </View>
-        )}
-
-        <Pressable
-          style={[styles.button2, isPublishing && { backgroundColor: "#ccc" }]}
-          onPress={handlePublish}
-          disabled={isPublishing}
-        >
-          <Text style={{ color: "#FFF", fontWeight: "500", fontSize: 15 }}>
-            {isPublishing ? "发布中..." : "发布"}
-          </Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.photoshow}>
-        {photoList.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={{ color: "#999" }}>暂无选中的照片</Text>
-          </View>
-        ) : (
-          <>
-            <Pressable
-              style={[
-                styles.coverbtn1,
-                currentPhoto?.isCover && { backgroundColor: "#72B6FF" ,width:50},
-              ]}
-              onPress={() =>
-                currentActiveIndex >= 0 && handleSetCover(currentActiveIndex)
-              }
+          {backAlert && (
+            <View
+              style={{
+                width: 113,
+                height: 60,
+                borderRadius: 12,
+                backgroundColor: "#fff",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "absolute",
+                gap: 7,
+                left: 24,
+                shadowColor: "#000",
+                shadowOffset: { width: 4, height: 10 },
+                shadowOpacity: 0.1,
+                zIndex: 999,
+              }}
             >
-              <Text style={{ color: "#fff" }}>
-                {currentPhoto?.isCover ? "封面" : "设为封面"}
-              </Text>
-            </Pressable>
-
-            <FlatList
-              data={renderData}
-              renderItem={renderItem}
-              keyExtractor={keyExtractor}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.flatListContent}
-              snapToAlignment="center"
-              decelerationRate="fast"
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            />
-          </>
-        )}
-      </View>
-
-      {currentPhoto && (
-        <View style={styles.copywriting}>
-          <TextInput
-            style={{ color: "#999", fontSize: 16, marginBottom: 8 }}
-            placeholder="为你的照片取个名字"
-            value={currentPhoto.title}
-            onChangeText={handleTitleChange}
-          />
-          <TextInput
-            placeholder="分享你对这个关键词的理解、照片背后的故事~"
-            placeholderTextColor="#CCC"
-            style={styles.textInput}
-            multiline
-            value={currentPhoto.desc}
-            onChangeText={handleDescChange}
-          />
-          {currentPhoto.recordingUri && (
-            <View style={styles.voice}>
-              <View style={styles.voiceBar}>
-                <Sound width={16} height={16} />
-                <Text style={styles.voiceDuration}>
-                  {currentPhoto.recordingDuration}'
+              <Pressable onPress={() => navigation.goBack()}>
+                <Text style={{ color: "#FE585B", fontSize: 12 }}>
+                  不保留返回
                 </Text>
-              </View>
-              <Pressable
-                onPress={handleDeleteRecording}
-                style={styles.deleteVoice}
-              >
-                <Text style={{ color: "#3d3d3d", fontSize: 14 }}>×</Text>
+              </Pressable>
+              <View
+                style={{
+                  width: 97,
+                  height: 0,
+                  borderTopColor: "#EEEEEE",
+                  borderTopWidth: 1,
+                }}
+              ></View>
+              <Pressable onPress={() => setBackAlert(false)}>
+                <Text style={{ color: "#3D3D3D", fontSize: 12 }}>保留编辑</Text>
               </Pressable>
             </View>
           )}
-        </View>
-      )}
 
-      {photoList.length > 0 && (
-        <VoiceRecorder onRecordingSaved={handleRecordingSaved} />
-      )}
-    </SafeAreaProvider>
-  );
+          <Pressable
+            style={[
+              styles.button2,
+              isPublishing && { backgroundColor: "#ccc" },
+            ]}
+            onPress={handlePublish}
+            disabled={isPublishing}
+          >
+            <Text style={{ color: "#FFF", fontWeight: "500", fontSize: 15 }}>
+              {isPublishing ? "发布中..." : "发布"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* 图片展示区 */}
+        <View style={styles.photoshow}>
+          {photoList.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={{ color: "#999" }}>暂无选中的照片</Text>
+            </View>
+          ) : (
+            <>
+              <Pressable
+                style={[
+                  styles.coverbtn1,
+                  currentPhoto?.isCover && {
+                    backgroundColor: "#72B6FF",
+                    width: 50,
+                  },
+                ]}
+                onPress={() =>
+                  currentActiveIndex >= 0 && handleSetCover(currentActiveIndex)
+                }
+              >
+                <Text style={{ color: "#fff" }}>
+                  {currentPhoto?.isCover ? "封面" : "设为封面"}
+                </Text>
+              </Pressable>
+
+              <FlatList
+                data={renderData}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.flatListContent}
+                snapToAlignment="center"
+                decelerationRate="fast"
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+              />
+            </>
+          )}
+        </View>
+
+        {/* 文案输入区 */}
+        {currentPhoto && (
+          <View style={styles.copywriting}>
+            <TextInput
+              style={{ color: "#999", fontSize: 16, marginBottom: 5 }}
+              placeholder="为你的照片取个名字"
+              value={currentPhoto.title}
+              onChangeText={handleTitleChange}
+            />
+            <TextInput
+              placeholder="分享你对这个关键词的理解、照片背后的故事~"
+              placeholderTextColor="#CCC"
+              style={styles.textInput}
+              multiline
+              value={currentPhoto.desc}
+              onChangeText={handleDescChange}
+            />
+            {currentPhoto.recordingUri && (
+              <View style={styles.voice}>
+                <View style={styles.voiceBar}>
+                  <Sound width={16} height={16} />
+                  <Text style={styles.voiceDuration}>
+                    {currentPhoto.recordingDuration}hhh'
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={handleDeleteRecording}
+                  style={styles.deleteVoice}
+                >
+                  <Voicecocle/>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        )}
+
+        {photoList.length > 0 && (
+          <VoiceRecorder onRecordingSaved={handleRecordingSaved} />
+        )}
+      </View>
+    </KeyboardAwareScrollView>
+  </KeyboardProvider>
+);
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-    alignItems: "center",
-    paddingTop: 56,
+
     position: "relative",
   },
   header: {
@@ -661,22 +685,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   photoshow: {
-    height: 360,
+    height: 417,
     width: "100%",
-    backgroundColor: "#F5F5F5",
-    marginBottom: 37,
     overflow: "hidden",
     alignItems: "center",
   },
-  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
-  flatListContent: { alignItems: "center" },
+  emptyContainer: { alignItems: "center", justifyContent: "center" },
+  flatListContent: {},
   imageItemContainer: {
     width: screenWidth,
-    height: 400,
     overflow: "hidden",
     alignItems: "center",
-    justifyContent: "center",
     position: "relative",
+    shadowColor: "rgba(0,0,0)",
+    shadowOffset: { width: 4, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   image: {
     width: 257,
@@ -696,7 +720,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 10,
   },
-  addIconContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
+  addIconContainer: {
+    width: 257,
+    height: 343,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EFEFEF",
+    borderRadius: 20,
+  },
   copywriting: {
     width: "90%",
     minHeight: 140,
@@ -705,7 +736,11 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 11,
   },
-  textInput: { flex: 1, fontSize: 14, color: "#333", textAlignVertical: "top" },
+  textInput: {
+    fontSize: 14,
+    color: "#333",
+    minHeight: 40,
+  },
   voice: {
     flexDirection: "row",
     backgroundColor: "#FFF",
@@ -731,7 +766,7 @@ const styles = StyleSheet.create({
   deleteVoice: {
     width: 14,
     height: 14,
-    borderRadius: 50,
+    borderRadius: 7,
     backgroundColor: "#D8D8D8",
     alignItems: "center",
     justifyContent: "center",
