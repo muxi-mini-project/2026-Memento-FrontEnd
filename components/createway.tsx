@@ -25,18 +25,15 @@ const Createway = () => {
 
     if (!result.canceled) {
       const photo = {
-        id: 0,
+        id: Date.now().toString(),
         uri: result.assets[0].uri,
         width: result.assets[0].width,
         height: result.assets[0].height,
         fileName: result.assets[0].fileName,
       };
       console.log('拍摄的照片:', photo);
-      Alert.alert('拍摄成功', '已获取照片，即将跳转编辑页面');
-      
-
       router.navigate({
-        pathname: '/beforepulish',
+        pathname: '/beforePulish',
         params: {
           photos: JSON.stringify([photo]), 
         },
@@ -74,7 +71,7 @@ const Createway = () => {
       
       // 跳转并传参
       router.navigate({
-        pathname: '/beforepulish',
+        pathname: '/beforePulish',
         params: {
           photos: JSON.stringify(selectedPhotos),
         },
