@@ -35,7 +35,7 @@ service.interceptors.response.use(
       console.error("请求超时：", error);
     } else if (error.response) {
       console.error("接口错误：", error.response.status, error.response.data);
-      alert(`接口请求失败：${error.response.status}`);
+      alert(`接口请求失败：${error.response}`);
     } else if (error.request) {
       console.error("网络错误：", error.request);
       alert("网络异常，请检查网络连接");

@@ -1,25 +1,23 @@
-import {
-  ImageBackground,
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ImageSourcePropType,
-  FlatList,
-  Pressable,
-  Image,
-  ScrollView,
-  Dimensions, // 新增：获取屏幕宽高
-} from "react-native";
 import { BlurView } from "expo-blur";
-import VoiceIcon from "../assets/images/sound2.svg";
-import usePromptStore from "./stores/usePromptStore";
-import Arrowback from "../assets/images/goback.svg";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 import Arrow from "../assets/images/arrow-bottom.svg";
-import { getOfficialUploadDetail } from "./api/keywords";
+import Arrowback from "../assets/images/goback.svg";
+import VoiceIcon from "../assets/images/sound2.svg";
 import { detaildataItem } from "./api/interface";
+import { getOfficialUploadDetail } from "./api/keywords";
 
 // 新增：获取屏幕宽高
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -30,22 +28,22 @@ export default function PostCardDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const params = useLocalSearchParams();
-  const router=useRouter();
-  const formatIsoDateToYMD = (isoDate:string) => {
-  if (!isoDate) return ''; // 处理空值
-  
-  try {
-    // 创建 Date 对象（自动解析 ISO 格式）
-    const date = new Date(isoDate);
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // 1-12
-    const day = date.getDate(); // 1-31
-    return `${year}/${month}/${day}`;
-  } catch (error) {
-    console.error('日期转换失败：', error);
-    return ''; // 转换失败返回空字符串
-  }
-};
+  const router = useRouter();
+  const formatIsoDateToYMD = (isoDate: string) => {
+    if (!isoDate) return ""; // 处理空值
+
+    try {
+      // 创建 Date 对象（自动解析 ISO 格式）
+      const date = new Date(isoDate);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1; // 1-12
+      const day = date.getDate(); // 1-31
+      return `${year}/${month}/${day}`;
+    } catch (error) {
+      console.error("日期转换失败：", error);
+      return ""; // 转换失败返回空字符串
+    }
+  };
   const uploadId = (() => {
     if (Array.isArray(params.upload_id)) return params.upload_id[0] || "";
     return params.upload_id || "";
@@ -119,7 +117,7 @@ export default function PostCardDetail() {
           // 6. 每个item宽度设为屏幕宽度
           <View style={{ width: screenWidth, height: screenHeight }}>
             <ImageBackground
-              source={{ uri: item.image?.variants?.original?.url || "" }}
+              source={{ uri: item.image?.variants?.detail_large?.url || "" }}
               style={styles.backgroundImage}
               imageStyle={styles.imageStyle}
             >
@@ -129,10 +127,10 @@ export default function PostCardDetail() {
                 style={StyleSheet.absoluteFill}
               >
                 <View style={styles.contentContainer}>
-                  <Pressable style={styles.imagelist} >
+                  <Pressable style={styles.imagelist}>
                     <Image
                       source={{
-                        uri: item.image?.variants?.original?.url || "",
+                        uri: item.image?.variants?.detail_large?.url || "",
                       }}
                       style={{ flex: 1 }}
                       resizeMode="cover"
@@ -150,15 +148,17 @@ export default function PostCardDetail() {
                   >
                     <Text style={styles.title}>{item.title || "无标题"}</Text>
                     {item.has_audio && (
-                        <Pressable style={styles.voice}>
-                          <VoiceIcon />
-                          <Text style={{ color: "#FFFFFF", fontSize: 12 }}>
-                            {item.audio_duration_ms || 0}'
-                          </Text>
-                        </Pressable>
-                      )}
+                      <Pressable style={styles.voice}>
+                        <VoiceIcon />
+                        <Text style={{ color: "#FFFFFF", fontSize: 12 }}>
+                          {item.audio_duration_ms || 0}'
+                        </Text>
+                      </Pressable>
+                    )}
 
-                    <Text style={styles.date}>{formatIsoDateToYMD(item.created_at)}</Text>
+                    <Text style={styles.date}>
+                      {formatIsoDateToYMD(item.created_at)}
+                    </Text>
                   </View>
                   <View
                     style={{
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   voice: {
     height: 24,
-    width:72,
+    width: 72,
     flexDirection: "row",
     borderRadius: 10,
     borderColor: "rgba(255, 255, 255, 0.5)",
