@@ -48,16 +48,6 @@
           "enableBackgroundPlayback": true,
           "enableBackgroundRecording": false
         }
-      ],
-      [
-         "expo-splash-screen",
-     {
-    "image": "./assets/images/openPhoto.png",
-    "imageWidth": 200, 
-    "resizeMode": "contain",
-     "enableFullScreenImage": true, 
-    "backgroundColor": "#ffffff"
-  }
       ]
     ],
     "experiments": {
