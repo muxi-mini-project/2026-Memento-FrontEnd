@@ -620,7 +620,7 @@ return (
                 <View style={styles.voiceBar}>
                   <Sound width={16} height={16} />
                   <Text style={styles.voiceDuration}>
-                    {currentPhoto.recordingDuration}hhh'
+                    {currentPhoto.recordingDuration}'
                   </Text>
                 </View>
                 <Pressable
