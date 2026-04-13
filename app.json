@@ -5,8 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "memento",
-    "userInterfaceStyle": "automatic",
-    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/images/Rectangle.png",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kazjj.memento",
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/Rectangle.png",
         "backgroundColor": "#E6F4FE"
       },
       "predictiveBackGestureEnabled": false,
