@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import React, { useEffect } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import Mmeeyes from "../assets/images/Mmeyes.svg"
 export default function ForgotPassword() {
   const navigation = useNavigation();
   useEffect(() => {
@@ -19,6 +19,7 @@ export default function ForgotPassword() {
         locations={[0, 0.48, 1]}
         style={styles.gradientBackground}
       >
+        <Mmeeyes style={styles.mm}></Mmeeyes>
         <View style={styles.forgetcard}>
           <View style={styles.header}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -59,11 +60,17 @@ const styles = StyleSheet.create({
     gradientBackground: {
     flex: 1,
     width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center", 
+    position: "relative",
+  },
+  mm:{
+    position: "absolute",
+    zIndex: 999,
+    top:59
   },
   forgetcard: {
     backgroundColor: "#ffffff",
+     marginTop:184,
     width: 327,
     height: 460,
     borderRadius: 24,
