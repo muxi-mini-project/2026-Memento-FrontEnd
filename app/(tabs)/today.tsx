@@ -72,10 +72,13 @@ export default function TabTwoScreen() {
     };
     fetchKeyWords();
   }, []);
-  const changesentence = () => {
-    const randomIndex = Math.floor(Math.random() * dailysentenceku.length);
-    setDailysentence(dailysentenceku[randomIndex]);
-  };
+  const getRandomSentence = () => {
+  const randomIndex = Math.floor(Math.random() * dailysentenceku.length);
+  return dailysentenceku[randomIndex];
+};
+  useEffect(() => {
+   setDailysentence(getRandomSentence());
+  }, []);
   const dailysentenceku = [
     "很多快乐来不及命名,只被当作日常",
     "用微小的事物感知幸福",
@@ -94,12 +97,11 @@ export default function TabTwoScreen() {
           <Idea></Idea>
         </View>
 
-        <Pressable
+        <View
           style={{ position: "absolute", top: 35, left: -19 }}
-          onPress={changesentence}
         >
           <Memento width={234} height={234}></Memento>
-        </Pressable>
+        </View>
         <View style={styles.talkkuang}>
           <TalkKuang style={{ position: "absolute" }} />
           <Text style={styles.talktext}>{dailysentence}</Text>
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
   },
   triangle: {},
   keyword: {
-    width: 154,
+   
     height: 70,
     marginTop: 269,
     alignItems: "center",
