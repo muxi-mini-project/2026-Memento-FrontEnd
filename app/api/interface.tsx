@@ -123,7 +123,13 @@ export interface notfiItem {
   actor_avatar_url: string;
   type: string;
   upload_id: string;
-  cover_image: Notificover;
+  cover_image: {
+    square_small: {
+      url: string;
+      width: number;
+      height: number;
+    };
+  };
   reaction_type: string;
   created_at: string;
   read_at: string;
