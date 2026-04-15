@@ -79,10 +79,11 @@ export default function Configure() {
   return (
     <SafeAreaProvider style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Arrowback style={styles.arrowback} />
-          <Text style={styles.headertext}>设置</Text>
+        <Pressable onPress={() => router.back()}
+          style={styles.arrowback}>
+          <Arrowback  />
         </Pressable>
+                  <Text style={styles.headertext}>设置</Text>
       </View>
 
       <View style={{ paddingHorizontal: 24, width: "100%", backgroundColor: "#F9F9F9" }}>
@@ -98,7 +99,7 @@ export default function Configure() {
         </View>
 
         <Text style={styles.titletext}>隐私权限</Text>
-        <View style={[styles.kuang, { flexDirection: "row", gap: 30 }]}>
+        <View style={[styles.kuang, { flexDirection: "row", justifyContent: "space-between" }]}>
           <Text>是否公开官方关键词下上传的照片</Text>
           <Pressable
             style={[
@@ -184,6 +185,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 44,
     alignItems: "center",
+    justifyContent: "center",
     position: "relative",
     backgroundColor: "#fff",
   },
@@ -194,8 +196,6 @@ const styles = StyleSheet.create({
   headertext: {
     fontSize: 16,
     fontWeight: "500",
-    position: "absolute",
-    left: 164,
   },
   titletext: {
     color: "#999999",

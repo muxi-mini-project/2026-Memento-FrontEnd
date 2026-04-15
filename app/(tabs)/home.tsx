@@ -7,6 +7,7 @@ import {
   Image,
   FlatList,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -19,9 +20,11 @@ import { getMedata } from "../api/me";
 import { mydataItem } from "../api/interface";
 import { useMyStore } from "../stores/authstore";
 import NewCreate from "@/components/newCreate";
-import Touxiang from "../../assets/images/basetouxaing.svg";
+import Touxiang from "../../assets/images/baseTouxiang.svg";
 import { getCustomKeywordList } from "../api/me";
 import * as SecureStore from "expo-secure-store";
+const { width: screenWidth } = Dimensions.get("window");
+
 export default function HomeScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
@@ -39,8 +42,8 @@ export default function HomeScreen() {
   useEffect(() => {
     const getMydata = async () => {
       try {
-const token = await SecureStore.getItemAsync("access_token");    
-    if (token !== null) {
+        const token = await SecureStore.getItemAsync("access_token");
+        if (token !== null) {
           const res = await getMedata();
           setMydata(res.data);
         } else {
@@ -104,11 +107,16 @@ const token = await SecureStore.getItemAsync("access_token");
           source={{ uri: avatar_url }}
           imageStyle={styles.backgroundImageStyle}
         >
-          {avatar_url ? (
-            <Image style={styles.touxiang} source={{ uri: avatar_url }}></Image>
-          ) : (
-            <Touxiang style={styles.touxiang}></Touxiang>
-          )}
+          <View style={styles.touxiang}>
+            {avatar_url ? (
+              <Image
+                style={{ width: "100%", height: "100%" }}
+                source={{ uri: avatar_url }}
+              ></Image>
+            ) : (
+              <Touxiang style={{ width: "100%", height: " 100%" }}></Touxiang>
+            )}
+          </View>
 
           <Text style={styles.username}>{nickname}</Text>
           <Pressable
@@ -162,7 +170,7 @@ const token = await SecureStore.getItemAsync("access_token");
             />
           }
         />
-        <Goodmm style={styles.Goodmm}></Goodmm>
+        {/* <Goodmm style={styles.Goodmm}></Goodmm> */}
       </View>
     </View>
   );
@@ -217,25 +225,23 @@ const styles = StyleSheet.create({
     opacity: 0.25,
   },
   touxiang: {
-    flex: 1,
     width: 100,
     height: 100,
     top: 118,
     borderRadius: "50%",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
     overflow: "hidden",
   },
   username: {
     top: 120,
-    // left: 158,
     fontSize: 20,
     color: "#3D3D3D",
     fontWeight: "700",
     marginTop: 7,
   },
   editkuang: {
-    position: "absolute",
-    top: 180,
-    left: 210,
     backgroundColor: "#72B6FF",
     width: 26,
     height: 26,
@@ -243,6 +249,12 @@ const styles = StyleSheet.create({
     zIndex: 1,
     alignItems: "center",
     justifyContent: "center",
+    marginLeft: 60,
+    marginTop: 60,
+    shadowColor:"#000",
+    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
   },
   goodmm: {
     width: 150,
@@ -254,7 +266,7 @@ const styles = StyleSheet.create({
   },
   sumcontainer: {
     height: 100,
-    width: 327,
+    width: screenWidth - 48,
     backgroundColor: "#ffffff",
     borderRadius: 10,
     flexDirection: "row",
@@ -268,7 +280,7 @@ const styles = StyleSheet.create({
   sumitem: {
     alignItems: "center",
     justifyContent: "center",
-    width: 163,
+    width: "50%",
     height: 120,
   },
   fengeline: {
@@ -290,15 +302,17 @@ const styles = StyleSheet.create({
   listheader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 180,
+    justifyContent: "space-between",
+    width: "100%",
     marginTop: 39,
+    paddingHorizontal: 37,
   },
-  Goodmm: {
-    width: 150,
-    height: 150,
-    position: "absolute",
-    left: 214,
-    top: 195,
-    zIndex: 1,
-  },
+  // Goodmm: {
+  //   width: 150,
+  //   height: 150,
+  //   position: "absolute",
+  //   left: 214,
+  //   top: 195,
+  //   zIndex: 1,
+  // },
 });

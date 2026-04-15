@@ -2,9 +2,9 @@ import { PromptWords } from "@/app/api/interface";
 import { drawOfficialPrompt } from "@/app/api/keywords";
 import usePromptStore from "@/app/stores/usePromptStore";
 import { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View,Dimensions } from "react-native";
 import Createway from "./createway";
-
+const { width: screenWidth } = Dimensions.get("window");
 interface SmalltipProps {
   borderColor: string;
   textColor: string;
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   findkuang: {
     display: "flex",
     flexDirection: "column",
-    width: 335,
+    width: screenWidth * (335/375),
     height: 100,
     borderRadius: 20,
     borderWidth: 2,

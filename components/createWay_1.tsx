@@ -1,10 +1,12 @@
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, Text, View, StyleSheet, Alert } from "react-native";
+import { Pressable, Text, View, StyleSheet, Alert,Dimensions } from "react-native";
 import { PhotoObject } from "../app/api/interface";
 import { logger } from "react-native-reanimated/lib/typescript/common";
 import usePromptStore from "@/app/stores/usePromptStore";
+const { width: screenWidth } = Dimensions.get("window");
+
 export function TakePhotoWay() {
   // 打开相机
    const router=useRouter();
@@ -47,11 +49,7 @@ export function TakePhotoWay() {
     </Pressable>
   );
 }
-interface PhotoWayProps {
-  onPhotosSelected: (photos: PhotoObject[]) => void;
-}
-
-export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
+export function PhotoWay() {
     const router=useRouter();
   // 打开相册
   const keyword_id=usePromptStore(state => state.keyword_id);
@@ -79,12 +77,6 @@ export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
         height: asset.height,
         fileName: asset.fileName, 
       }));
-
-
-      if (typeof onPhotosSelected === "function") {
-        onPhotosSelected(selectedPhotos);
-      }
-      console.log("子组件选中的照片列表:", selectedPhotos);      
     router.navigate({
       pathname: "/beforePulish",
         params: {
@@ -107,7 +99,7 @@ export function PhotoWay({ onPhotosSelected}: PhotoWayProps) {
 const styles = StyleSheet.create({
   optionItem: {
     flexDirection: "column",
-    width: 158,
+    width: screenWidth*(158/375),
     height: 80,
     borderRadius: 20,
     borderColor: "#EEEEEE",

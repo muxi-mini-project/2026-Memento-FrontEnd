@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
   ImageBackground,
+  Dimensions,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Memento from "../../assets/images/memento.svg";
@@ -17,9 +18,9 @@ import { PhotoObject } from "../api/interface";
 import {  getoffcialHome } from "../api/keywords";
 import usePromptStore from "../stores/usePromptStore";
 import TalkKuang from "../../assets/images/talkkuang.svg";
-import axios from "axios";
+const { width: screenWidth } = Dimensions.get("window");
 export default function TabTwoScreen() {
-  const router = useRouter()
+    const router = useRouter()
   const [dailysentence, setDailysentence] =
     useState("很多快乐来不及命名,只被当作日常");
   const [keyWords_text, setKeyWords_text] = useState(" 关键词");
@@ -34,10 +35,6 @@ export default function TabTwoScreen() {
     (state) => state.setYesterdaysKeyword,
   );
   const setYesterdaydate = usePromptStore((state) => state.setYesterdaydate);
-  const handlePhotosSelected = (photos: PhotoObject[]) => {
-    console.log("父组件收到的照片列表:", photos);
-    Alert.alert("成功", `共选中 ${photos.length} 张照片`);
-  };
   const formatDate = (dateStr: string) => {
     if (!dateStr || !dateStr.includes("-")) {
       return dateStr;
@@ -105,7 +102,6 @@ export default function TabTwoScreen() {
         <View style={styles.talkkuang}>
           <TalkKuang style={{ position: "absolute" }} />
           <Text style={styles.talktext}>{dailysentence}</Text>
-          <View style={styles.triangle} />
         </View>
 
         <View style={styles.keyword}>
@@ -113,7 +109,7 @@ export default function TabTwoScreen() {
         </View>
         <View style={styles.ChooseWay}>
           <TakePhotoWay></TakePhotoWay>
-          <PhotoWay onPhotosSelected={handlePhotosSelected}></PhotoWay>
+          <PhotoWay ></PhotoWay>
         </View>
         <View style={styles.todaydata}>
           <Text style={styles.todaytext}>今日</Text>
@@ -178,9 +174,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     lineHeight: 15,
   },
-  triangle: {},
   keyword: {
-   
     height: 70,
     marginTop: 269,
     alignItems: "center",
@@ -192,19 +186,18 @@ const styles = StyleSheet.create({
   ChooseWay: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     width: "100%",
-    gap: 11,
     marginTop: 145,
     marginBottom: 10,
+    paddingHorizontal: 24,
   },
   todaydata: {
     position: "relative",
     height: 110,
-    width: 327,
+    width: screenWidth - 48,
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    marginHorizontal: 24,
     marginBottom: 20,
   },
   todaytext: {

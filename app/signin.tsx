@@ -1,13 +1,14 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useNavigation } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
+  Alert,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Agree from "../assets/images/agree.svg";
@@ -23,6 +24,10 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [Mm, setMm] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const countdownTimer = useRef<NodeJS.Timeout | null>(null); // 新增：清理倒计时
+
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({
@@ -34,21 +39,17 @@ export default function SignIn() {
       alert("请阅读并同意《隐私协议》和《用户协议》");
       return;
     }
-    const token = await SecureStore.getItemAsync("signup_token");
-    if (!token) {
-      alert("请先注册");
+    const res = await loginPwd(email, password);
+    console.log(res.data);
+    if (res.status === 200) {
+      const { access_token, expires_in, token_type } = res.data;
+      await SecureStore.setItemAsync("access_token", access_token);
+      await SecureStore.setItemAsync("expires_in", expires_in.toString());
+      await SecureStore.setItemAsync("token_type", token_type);
+      navigation.navigate("index" as never);
     } else {
-      const res = await loginPwd(email, password);
-      console.log(res.data);
-      if (res.status === 200) {
-        const { access_token,  expires_in, token_type } =
-          res.data;
-        await SecureStore.setItemAsync("access_token", access_token);
-        await SecureStore.setItemAsync("expires_in", expires_in.toString());
-        await SecureStore.setItemAsync("token_type", token_type);
-        navigation.navigate("index" as never);
-      } else {
-        alert("登录失败，请检查邮箱和密码");
+      if (res.data.code === "not_found") {
+        Alert.alert("用户不存在，请注册");
       }
     }
   };
@@ -59,7 +60,21 @@ export default function SignIn() {
     }
     const res = await sendlogincode(email);
     if (res.status === 204) {
+      setCountdown(60);
+      setIsDisabled(true);
       alert("验证码已发送，请注意查收");
+      if (countdownTimer.current) clearInterval(countdownTimer.current);
+      countdownTimer.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownTimer.current!);
+            setIsDisabled(false);
+            return 0;
+          } else {
+            return prev - 1;
+          }
+        });
+      }, 1000);
     } else {
       alert("验证码发送失败，请稍后再试");
     }
@@ -91,9 +106,9 @@ export default function SignIn() {
         style={[styles.gradientBackground]}
       >
         {Mm ? (
-          <Mmnoeyes style={[styles.Mm,{pointerEvents:"none" }]}></Mmnoeyes>
+          <Mmnoeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmnoeyes>
         ) : (
-          <Mmeyes style={[styles.Mm,{pointerEvents:"none" }]}></Mmeyes>
+          <Mmeyes style={[styles.Mm, { pointerEvents: "none" }]}></Mmeyes>
         )}
         <View style={styles.card}>
           <View style={styles.tabcontainer}>
@@ -108,7 +123,7 @@ export default function SignIn() {
             >
               <Pressable
                 onPress={() => setLoginway("password")}
-                style={{ zIndex: 1,}}
+                style={{ zIndex: 1 }}
               >
                 <Text style={loginway === "password" && styles.wayText}>
                   密码登录
@@ -239,8 +254,14 @@ export default function SignIn() {
                       value={code}
                       onChangeText={(text) => setCode(text)}
                     ></TextInput>
-                    <Pressable style={styles.getcode} onPress={handleSendCode}>
-                      <Text style={styles.getcodeText}>获取验证码</Text>
+                    <Pressable
+                      style={styles.getcode}
+                      onPress={handleSendCode}
+                      disabled={isDisabled}
+                    >
+                      <Text style={styles.getcodeText}>
+                        {countdown > 0 ? `${countdown}秒后重发` : "获取验证码"}
+                      </Text>
                     </Pressable>
                   </View>
                 </View>

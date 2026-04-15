@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image, Dimensions, } from "react-native";
 import * as Progress from "react-native-progress";
 import ArrowRgiht from "../assets/images/arrow-right.svg";
 import CoverImage from "../assets/images/baseCover.svg";
@@ -13,6 +13,8 @@ type Props = {
   cover?: Notificover | null;
   keyword_id:string;
 };
+const { width: screenWidth } = Dimensions.get("window");
+
 export default function HomeCard(props: Props) {
   return (
     <View style={styles.card}>
@@ -53,7 +55,7 @@ export default function HomeCard(props: Props) {
             )
           }}
         >
-          <ArrowRgiht></ArrowRgiht>
+          <ArrowRgiht strokeWidth={1.4} stroke="#3D3D3D"></ArrowRgiht>
         </Pressable>
       </View>
       {props.hasAim && (
@@ -73,7 +75,7 @@ export default function HomeCard(props: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
-    width: 327,
+    width: screenWidth - 48,
     height: 80,
     borderRadius: 20,
     paddingLeft: 17,

@@ -7,7 +7,7 @@ import { use, useEffect, useState } from "react";
 import { updateMeNickname } from "./api/me";
 import { useMyStore } from "./stores/authstore";
 import * as ImagePicker from "expo-image-picker";
-import BaseTouXiang from "../assets/images/basetouxaing.svg";
+import BaseTouXiang from "../assets/images/baseTouxiang.svg";
 export default function setAuthdata() {
   const name = useMyStore((state) => state.nickname);
   const avatar_url = useMyStore((state) => state.avatar_url);
@@ -48,7 +48,6 @@ export default function setAuthdata() {
       allowsEditing: false,
     });
     if (!result.canceled) {
-
     }
   };
   return (
@@ -58,10 +57,11 @@ export default function setAuthdata() {
           onPress={() => {
             router.back();
           }}
+          style={styles.arrowback}
         >
-          <Arrowback style={styles.arrowback} />
-          <Text style={styles.headertext}>个人资料</Text>
+          <Arrowback />
         </Pressable>
+        <Text style={styles.headertext}>个人资料</Text>
       </View>
       <View
         style={{
@@ -91,7 +91,12 @@ export default function setAuthdata() {
           <View style={styles.kuang}>
             <Text style={styles.text}>昵称</Text>
             <Text>{name}</Text>
-            <Pressable style={styles.ArrowRight} onPress={()=>{router.navigate("/updateName")}}>
+            <Pressable
+              style={styles.ArrowRight}
+              onPress={() => {
+                router.navigate("/updateName");
+              }}
+            >
               <ArrowRight></ArrowRight>
             </Pressable>
           </View>
@@ -112,11 +117,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
-    flexDirection: "row",
     height: 44,
     width: "100%",
     marginTop: 44,
     alignItems: "center",
+    justifyContent: "center",
     position: "relative",
     backgroundColor: "#fff",
   },
@@ -127,11 +132,8 @@ const styles = StyleSheet.create({
   headertext: {
     fontSize: 16,
     fontWeight: 500,
-    position: "absolute",
-    left: 164,
   },
   body: {
-    width: 327,
     height: 130,
     borderRadius: 20,
     backgroundColor: "#FFFFFF",
