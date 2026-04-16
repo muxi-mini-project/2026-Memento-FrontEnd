@@ -19,12 +19,8 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName="(tabs)">
+      <Stack initialRouteName="index">
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* <Stack.Screen
-          name="beforepublish"
-          options={{ headerShown: false }}
-        ></Stack.Screen> */}
          <Stack.Screen
           name="index"
           options={{ headerShown: false }}
