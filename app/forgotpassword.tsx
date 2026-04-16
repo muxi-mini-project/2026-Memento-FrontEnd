@@ -1,98 +1,374 @@
 import Arrowleft from "@/assets/images/arrow-left.svg";
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View, } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Dimensions,
+  Alert
+} from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { LinearGradient } from "expo-linear-gradient";
-import Mmeeyes from "../assets/images/Mmeyes.svg"
-export default function ForgotPassword() {
+import Mmeyes from "../assets/images/Mmeyes.svg";
+import AgreeIcon from "../assets/images/agreeIcon.svg";
+import Pass from "../assets/images/pass.svg";
+import Warning from "../assets/images/warning.svg";
+import { resetSendcode,verifyResetEmailCode,resetComplete } from "./api/user";
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+export default function Signup() {
   const navigation = useNavigation();
-  useEffect(() => {
-    navigation.setOptions({
+
+  // --- 状态管理 ---
+  const [email, setEmail] = useState("");
+  const [sendCodeText, setSendCodeText] = useState("");
+  const [new_password, setNew_password] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  
+  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning/>);
+  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(<Warning/>);
+  
+  const [countdown, setCountdown] = useState(0);
+  const [agreed, setAgreed] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  // --- 引用管理 ---
+  const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const countdownTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastVerifiedCode = useRef(""); // 记录上次验证成功的代码，避免重复请求
+
+  useEffect(()=>{
+   navigation.setOptions({
       headerShown: false,
     });
+  },[])
+  // 密码实时比对逻辑
+  useEffect(() => {
+    if (pwdDebounceTimer.current) clearTimeout(pwdDebounceTimer.current);
+    
+    pwdDebounceTimer.current = setTimeout(() => {
+      if (new_password && confirmPwd) {
+        setVerifypasswordResult(new_password === confirmPwd ? <Pass /> : <Warning />);
+      } else {
+        setVerifypasswordResult(<Warning/>);
+      }
+    }, 500);
+
+    return () => {
+      if (pwdDebounceTimer.current) clearTimeout(pwdDebounceTimer.current);
+    };
+  }, [new_password, confirmPwd]);
+
+  //  验证码校验 (独立于倒计时)
+  const handleVerify = async (code: string) => {
+    if (!email || code.length !== 6) return;
+    if (code === lastVerifiedCode.current) return; // 已验证过则跳过
+
+    try {
+      const res = await verifyResetEmailCode( email, code );
+      if (res.status === 200 && res.data.valid === true) {
+        setVerifyResult(<Pass />);
+        lastVerifiedCode.current = code; 
+        await SecureStore.setItemAsync("reset_token", res.data.reset_token);
+      } else {
+        setVerifyResult(<Warning />);
+      }
+    } catch (err) {
+      setVerifyResult(<Warning />);
+    }
+  };
+
+  useEffect(() => {
+    if (sendCodeText.length === 6) {
+      handleVerify(sendCodeText);
+    } else {
+      setVerifyResult(<Warning/>); 
+    }
+  }, [sendCodeText]);
+
+  // 发送验证码
+  const handleSendCode = async () => {
+    if (!email || !email.includes("@")) {
+      Alert.alert("提示", "请输入有效的邮箱地址");
+      return;
+    }
+    try {
+      setIsDisabled(true);
+      const res = await resetSendcode(email);
+      if (res.status === 204) {
+        setCountdown(60);
+        if (countdownTimer.current) clearInterval(countdownTimer.current);
+        countdownTimer.current = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(countdownTimer.current!);
+              setIsDisabled(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        setIsDisabled(false);
+        Alert.alert("错误", "发送失败，请检查邮箱是否正确");
+      }
+    } catch (error) {
+      setIsDisabled(false);
+      console.error(error);
+    }
+  };
+
+  // 注册提交
+  const handleRegister = async () => {
+    if (!agreed) return Alert.alert("提示", "请阅读并同意协议");
+    if (new_password.length < 8) return Alert.alert("提示", "密码长度需 ≥8 位");
+    if (new_password !== confirmPwd) return Alert.alert("提示", "两次密码不一致");
+
+    const reset_token = await SecureStore.getItemAsync("signup_token");
+    if (!reset_token) return Alert.alert("提示", "请先完成验证码校验");
+
+    try {
+      const res = await resetComplete({ reset_token, new_password });
+      if (res.status === 200) {
+        if (res.data.access_token) {
+          await SecureStore.setItemAsync("access_token", res.data.access_token);
+          navigation.navigate("index" as never);
+        } else {
+          navigation.navigate("signin" as never);
+        }
+      }
+    } catch (error) {
+      Alert.alert("注册失败", "请稍后重试");
+    }
+  };
+
+  // 页面销毁清理
+  useEffect(() => {
+    return () => {
+      if (pwdDebounceTimer.current) clearTimeout(pwdDebounceTimer.current);
+      if (countdownTimer.current) clearInterval(countdownTimer.current);
+    };
   }, []);
+
   return (
-      <LinearGradient
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
-        locations={[0, 0.48, 1]}
-        style={styles.gradientBackground}
-      >
-        <Mmeeyes style={styles.mm}></Mmeeyes>
-        <View style={styles.forgetcard}>
-          <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()}>
-              <Arrowleft width={5.5} height={12} />
-            </Pressable>
-            <Text>找回密码</Text>
-          </View>
-          <View style={styles.body}>
-            <Text>邮箱</Text>
-            <TextInput
-              style={styles.inputKuang}
-              placeholder="请输入邮箱"
-            ></TextInput>
-            <Text>验证码</Text>
-            <TextInput
-              style={styles.inputKuang}
-              placeholder="请输入验证码"
-            ></TextInput>
-            <Text>设置新密码</Text>
-            <TextInput
-              style={styles.inputKuang}
-              placeholder="请输入新密码"
-            ></TextInput>
-            <Text>确认新密码</Text>
-            <TextInput
-              style={styles.inputKuang}
-              placeholder="请再次确认新密码"
-            ></TextInput>
-          </View>
-          <Pressable style={styles.loginBtn}>
-            <Text style={styles.loginText}>确认</Text>
+    <LinearGradient
+      colors={["#BCDBFF", "#EFF7FF", "#FFFFFF"]}
+      locations={[0, 0.48, 1]}
+      style={styles.gradientBackground}
+    >
+      <Mmeyes style={styles.eyeIcon} />
+      
+      <View style={styles.forgetcard}>
+        {/* 头部 */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Arrowleft />
           </Pressable>
+          <Text style={styles.headerTitle}>找回密码</Text>
         </View>
-      </LinearGradient>
+
+        <View style={styles.body}>
+          {/* 邮箱 */}
+          <Text style={styles.tiptext}>邮箱</Text>
+          <TextInput
+            style={styles.inputKuang}
+            placeholder="请输入邮箱"
+            onChangeText={setEmail}
+            value={email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          {/* 验证码 */}
+          <View style={styles.labelRow}>
+            <Text style={styles.tiptext}>验证码</Text>
+            {verifyResult}
+          </View>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={[styles.inputKuang, { flex: 1 }]}
+              placeholder="请输入验证码"
+              onChangeText={setSendCodeText}
+              value={sendCodeText}
+              maxLength={6}
+              keyboardType="numeric"
+            />
+            <Pressable 
+              onPress={handleSendCode} 
+              disabled={isDisabled}
+              style={styles.innerSendBtn}
+            >
+              <Text style={{ fontSize: 13, color: isDisabled ? "#999" : "#72B6FF" }}>
+                {countdown > 0 ? `${countdown}s` : "获取验证码"}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 密码 */}
+          <Text style={styles.tiptext}>设置密码 (≥8位)</Text>
+          <TextInput
+            style={styles.inputKuang}
+            placeholder="请输入新密码"
+            secureTextEntry
+            onChangeText={setNew_password}
+            value={new_password}
+            autoCapitalize="none"
+          />
+
+          {/* 确认密码 */}
+          <View style={styles.labelRow}>
+            <Text style={styles.tiptext}>确认密码</Text>
+            {verifypasswordResult}
+          </View>
+          <TextInput
+            style={styles.inputKuang}
+            placeholder="请再次输入密码"
+            secureTextEntry
+            onChangeText={setConfirmPwd}
+            value={confirmPwd}
+            autoCapitalize="none"
+          />
+        </View>
+
+        {/* 提交按钮 */}
+        <Pressable 
+          style={[styles.loginBtn, !agreed && { opacity: 0.7 }]} 
+          onPress={handleRegister}
+        >
+          <Text style={styles.loginText}>立即注册</Text>
+        </Pressable>
+
+      </View>
+    </LinearGradient>
   );
 }
+// const styles = StyleSheet.create({
+//   gradientBackground: {
+//     flex: 1,
+//     width: "100%",
+//     alignItems: "center",
+//   },
+//   content: {
+//     flex: 1,
+//     position: "relative",
+//   },
+
+//   forgetcard: {
+//     backgroundColor: "#ffffff",
+//     width: screenWidth - 48,
+//     height: screenHeight * (500 / 812),
+//     borderRadius: 24,
+//     padding: 20,
+//     display: "flex",
+//     flexDirection: "column",
+//     position: "relative",
+//     marginTop: 184,
+//   },
+//   header: {
+//     display: "flex",
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+//   body: {
+//     marginVertical: 20,
+//     display: "flex",
+//     flexDirection: "column",
+//     gap: 7,
+//   },
+//   tiptext: {
+//     marginLeft: 7,
+//     fontSize: 14,
+//     color: "#666666",
+//   },
+//   inputKuang: {
+//     backgroundColor: "#EEEEEE",
+//     height: 47,
+//     borderRadius: 20,
+//     paddingHorizontal: 15,
+//     fontSize: 14,
+//   },
+//   loginBtn: {
+//     backgroundColor: "#72B6FF",
+//     height: 47,
+//     borderRadius: 20,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginBottom: 20,
+//   },
+//   loginText: {
+//     color: "#ffffff",
+//     fontSize: 14,
+//     fontWeight: "500",
+//   },
+//   sendCodeText: {
+//     position: "absolute",
+//     top: 177,
+//     right: 33,
+//     zIndex: 1,
+//   },
+// });
+
 const styles = StyleSheet.create({
-    gradientBackground: {
+  gradientBackground: {
     flex: 1,
-    width: "100%",
-    alignItems: "center", 
-    position: "relative",
+    alignItems: "center",
   },
-  mm:{
+  eyeIcon: {
+    zIndex: 1,
     position: "absolute",
-    zIndex: 999,
-    top:59
+    top: 59,
   },
   forgetcard: {
     backgroundColor: "#ffffff",
-     marginTop:184,
-    width: 327,
-    height: 460,
+    width: screenWidth - 48,
     borderRadius: 24,
     padding: 20,
-    display: "flex",
-    flexDirection: "column",
+    marginTop: 184,
   },
   header: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    gap: 100,
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  backBtn: {
+    position: "absolute",
+    left: 0,
+    padding: 5,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
   },
   body: {
-    marginVertical: 20,
-    display: "flex",
-    flexDirection: "column",
-    gap: 7,
+    marginVertical: 10,
+    gap: 8,
+  },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 5,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  innerSendBtn: {
+    position: "absolute",
+    right: 15,
+  },
+  tiptext: {
+    marginLeft: 7,
+    fontSize: 13,
+    color: "#666666",
   },
   inputKuang: {
     backgroundColor: "#EEEEEE",
-    width: 296,
     height: 47,
     borderRadius: 20,
     paddingHorizontal: 15,
@@ -100,15 +376,17 @@ const styles = StyleSheet.create({
   },
   loginBtn: {
     backgroundColor: "#72B6FF",
-    width: 296,
     height: 47,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 15,
+    marginBottom: 15,
   },
   loginText: {
     color: "#ffffff",
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
   },
+
 });
