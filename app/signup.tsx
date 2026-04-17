@@ -1,60 +1,62 @@
 import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
+  Dimensions,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  View,
-  Dimensions,
-  Alert,
+  View
 } from "react-native";
 import AgreeIcon from "../assets/images/agreeIcon.svg";
 import Arrowleft from "../assets/images/arrow-leftsign.svg";
+import Mmeyes from "../assets/images/Mmeyes.svg";
 import Pass from "../assets/images/pass.svg";
 import Warning from "../assets/images/warning.svg";
-import Mmeyes from "../assets/images/Mmeyes.svg";
-import { LinearGradient } from "expo-linear-gradient";
 import { sendCode, signupComplete, verifyCode } from "./api/user";
+import { useGuideStore } from "./stores/useGuideStore";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function Signup() {
   const navigation = useNavigation();
+  const resetGuide = useGuideStore((state) => state.reset);
+  const lastVerifiedCode = useRef<string>("");
 
   // --- 状态管理 ---
   const [email, setEmail] = useState("");
   const [sendCodeText, setSendCodeText] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
-  
-  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning/>);
-  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(<Warning/>);
-  
+
+  const [verifyResult, setVerifyResult] = useState<React.ReactNode>(<Warning />);
+  const [verifypasswordResult, setVerifypasswordResult] = useState<React.ReactNode>(<Warning />);
+
   const [countdown, setCountdown] = useState(0);
   const [agreed, setAgreed] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
   // --- 引用管理 ---
-  const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  const countdownTimer = useRef<NodeJS.Timeout | null>(null);
-  const lastVerifiedCode = useRef(""); // 记录上次验证成功的代码，避免重复请求
+  const pwdDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(()=>{
-   navigation.setOptions({
+  useEffect(() => {
+    navigation.setOptions({
       headerShown: false,
     });
-  },[])
+  }, [navigation]);
   // 密码实时比对逻辑
   useEffect(() => {
     if (pwdDebounceTimer.current) clearTimeout(pwdDebounceTimer.current);
-    
+
     pwdDebounceTimer.current = setTimeout(() => {
       if (password && confirmPwd) {
         setVerifypasswordResult(password === confirmPwd ? <Pass /> : <Warning />);
       } else {
-        setVerifypasswordResult(<Warning/>);
+        setVerifypasswordResult(<Warning />);
       }
     }, 500);
 
@@ -72,7 +74,7 @@ export default function Signup() {
       const res = await verifyCode({ email, code });
       if (res.status === 200 && res.data.valid === true) {
         setVerifyResult(<Pass />);
-        lastVerifiedCode.current = code; 
+        lastVerifiedCode.current = code;
         await SecureStore.setItemAsync("signup_token", res.data.signup_token);
       } else {
         setVerifyResult(<Warning />);
@@ -86,7 +88,7 @@ export default function Signup() {
     if (sendCodeText.length === 6) {
       handleVerify(sendCodeText);
     } else {
-      setVerifyResult(<Warning/>); 
+      setVerifyResult(<Warning />);
     }
   }, [sendCodeText]);
 
@@ -124,10 +126,22 @@ export default function Signup() {
 
   // 注册提交
   const handleRegister = async () => {
-    if (!agreed) return Alert.alert("提示", "请阅读并同意协议");
-    if (password.length < 8) return Alert.alert("提示", "密码长度需 ≥8 位");
-    if (password !== confirmPwd) return Alert.alert("提示", "两次密码不一致");
-
+    if (!agreed) {
+      alert("请阅读并同意《隐私协议》和《用户协议》");
+      return;
+    }
+    if (!password || !confirmPwd) {
+      alert("请完成密码和确认密码的输入");
+      return;
+    }
+    if (password.length < 8) {
+      alert("密码长度必须大于等于8位");
+      return;
+    }
+    if (password !== confirmPwd) {
+      alert("两次输入的密码不一致，请重新输入");
+      return;
+    }
     const signup_token = await SecureStore.getItemAsync("signup_token");
     if (!signup_token) return Alert.alert("提示", "请先完成验证码校验");
 
@@ -136,6 +150,8 @@ export default function Signup() {
       if (res.status === 200) {
         if (res.data.access_token) {
           await SecureStore.setItemAsync("access_token", res.data.access_token);
+          // 新用户进入首页前，重置指导状态
+          resetGuide();
           navigation.navigate("index" as never);
         } else {
           navigation.navigate("signin" as never);
@@ -161,7 +177,7 @@ export default function Signup() {
       style={styles.gradientBackground}
     >
       <Mmeyes style={styles.eyeIcon} />
-      
+
       <View style={styles.signupcard}>
         {/* 头部 */}
         <View style={styles.header}>
@@ -197,8 +213,8 @@ export default function Signup() {
               maxLength={6}
               keyboardType="numeric"
             />
-            <Pressable 
-              onPress={handleSendCode} 
+            <Pressable
+              onPress={handleSendCode}
               disabled={isDisabled}
               style={styles.innerSendBtn}
             >
@@ -235,8 +251,8 @@ export default function Signup() {
         </View>
 
         {/* 提交按钮 */}
-        <Pressable 
-          style={[styles.loginBtn, !agreed && { opacity: 0.7 }]} 
+        <Pressable
+          style={[styles.loginBtn, !agreed && { opacity: 0.7 }]}
           onPress={handleRegister}
         >
           <Text style={styles.loginText}>立即注册</Text>
