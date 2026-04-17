@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import React, { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   FlatList,
@@ -9,17 +11,15 @@ import {
   Text,
   View,
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
-import { useRouter } from "expo-router";
 
-import Goodmm from "../../assets/images/goodmmm.svg";
+import Touxiang from "../../assets/images/basetouxaing.svg";
 import Configure from "../../assets/images/configure.svg";
 import Edit from "../../assets/images/edit.svg";
+import Goodmm from "../../assets/images/goodmmm.svg";
 import Message from "../../assets/images/message.svg";
-import Touxiang from "../../assets/images/basetouxaing.svg";
-import HomeCard from "../../components/homeCard";
 import GuideOverlay from "../../components/guide/GuideOverlay";
 import { GuideRect, GuideStep, GuideTargetKey } from "../../components/guide/types";
+import HomeCard from "../../components/homeCard";
 import NewCreate from "../../components/newCreate";
 import { mydataItem } from "../api/interface";
 import { getCustomKeywordList, getMedata } from "../api/me";
@@ -84,7 +84,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const setNickname = useMyStore((state) => state.setNickname);
   const currentStep = useGuideStore((state) => state.currentStep);
-  const hasHydrated = useGuideStore((state) => state.hasHydrated);
   const isFinished = useGuideStore((state) => state.isFinished);
   const nextStep = useGuideStore((state) => state.nextStep);
   const complete = useGuideStore((state) => state.complete);
@@ -94,13 +93,14 @@ export default function HomeScreen() {
   >({});
   const [mydata, setMydata] = useState<mydataItem>(INITIAL_MYDATA);
   const [refreshing, setRefreshing] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const messageRef = useRef<View | null>(null);
   const profileRef = useRef<View | null>(null);
   const createRef = useRef<View | null>(null);
   const cardRef = useRef<View | null>(null);
 
-  const guideVisible = hasHydrated && !isFinished;
+  const guideVisible = initialized && !isFinished;
 
   const updateLayout = useEffectEvent((
     key: GuideTargetKey,
@@ -152,6 +152,11 @@ export default function HomeScreen() {
 
     getMydata();
   }, [router]);
+
+  // 确保 guide store 已初始化
+  useEffect(() => {
+    setInitialized(true);
+  }, []);
 
   useEffect(() => {
     setNickname(mydata.nickname);

@@ -4,12 +4,10 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 type GuideStore = {
   currentStep: number;
-  hasHydrated: boolean;
   isFinished: boolean;
   complete: () => void;
   nextStep: (totalSteps: number) => void;
   reset: () => void;
-  setHasHydrated: (hasHydrated: boolean) => void;
 };
 
 const guideStorage = {
@@ -27,7 +25,6 @@ export const useGuideStore = create<GuideStore>()(
   persist(
     (set) => ({
       currentStep: 0,
-      hasHydrated: false,
       isFinished: false,
       complete: () =>
         set(() => ({
@@ -52,16 +49,9 @@ export const useGuideStore = create<GuideStore>()(
           currentStep: 0,
           isFinished: false,
         })),
-      setHasHydrated: (hasHydrated) =>
-        set(() => ({
-          hasHydrated,
-        })),
     }),
     {
       name: "home-guide-store",
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-      },
       partialize: (state) => ({
         currentStep: state.currentStep,
         isFinished: state.isFinished,

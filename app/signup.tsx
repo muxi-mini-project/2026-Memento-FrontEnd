@@ -1,22 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
-  TouchableOpacity,
   StyleSheet,
   Text,
   TextInput,
-  View,
-  Alert,
+  View
 } from "react-native";
 import AgreeIcon from "../assets/images/agreeIcon.svg";
 import Arrowleft from "../assets/images/arrow-leftsign.svg";
+import Mmeyes from "../assets/images/Mmeyes.svg";
 import Pass from "../assets/images/pass.svg";
 import Warning from "../assets/images/warning.svg";
-import { LinearGradient } from "expo-linear-gradient";
 import { sendCode, signupComplete, verifyCode } from "./api/user";
-import Mmeyes from "../assets/images/Mmeyes.svg";
+import { useGuideStore } from "./stores/useGuideStore";
 
 export default function Signup() {
   const [verifyResult, setVerifyResult] = useState<React.ReactNode>(
@@ -34,8 +33,7 @@ export default function Signup() {
 
   const pwdDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const countdownTimer = useRef<NodeJS.Timeout | null>(null); // 新增：清理倒计时
-  const navigation = useNavigation();
-
+  const navigation = useNavigation(); const resetGuide = useGuideStore((state) => state.reset);
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
@@ -112,7 +110,7 @@ export default function Signup() {
       alert("请完成密码和确认密码的输入");
       return;
     }
-    if(password.length < 8){
+    if (password.length < 8) {
       alert("密码长度必须大于等于8位");
       return;
     }
@@ -132,6 +130,8 @@ export default function Signup() {
       if (res.status === 200) {
         if (res.data.access_token) {
           await SecureStore.setItemAsync("access_token", res.data.access_token);
+          // 新用户进入首页前，重置指导状态
+          resetGuide();
           navigation.navigate("index" as never);
         } else {
           alert("注册成功，请登录");
