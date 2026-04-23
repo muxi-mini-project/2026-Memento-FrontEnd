@@ -27,11 +27,11 @@ const keywordColors = [
 export default function FindScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-
+  const [scrollViewHeight, setScrollViewHeight] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
   const [activeTab, setActiveTab] = useState("keyword");
   const [reviewData, setReviewData] = useState<ReviewDatesResponse>();
   const [keywordData, setKeywordData] = useState<ReviewkeywordItem[]>([]);
-
   const handleChange = (tab: string) => {
     setActiveTab(tab);
   };
@@ -187,6 +187,8 @@ export default function FindScreen() {
         <ScrollView
           style={styles.cardList}
           showsVerticalScrollIndicator={false}
+          onLayout={(e) => setScrollViewHeight(e.nativeEvent.layout.height)}
+          onContentSizeChange={(w, h) => setContentHeight(h)}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -234,20 +236,25 @@ export default function FindScreen() {
               </View>
             </View>
           ))}
-          <View
-            style={{
-              marginTop: 20,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text>已经浏览完全部创作过的关键词</Text>
-          </View>
+          {/* 需要上划时显示 */}
+          {contentHeight > scrollViewHeight && (
+            <View
+              style={{
+                marginTop: 20,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text>已经浏览完全部创作过的关键词</Text>
+            </View>
+          )}
         </ScrollView>
       ) : (
         <ScrollView
           style={styles.cardList}
           showsVerticalScrollIndicator={false}
+          onLayout={(e) => setScrollViewHeight(e.nativeEvent.layout.height)}
+          onContentSizeChange={(w, h) => setContentHeight(h)}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -306,15 +313,18 @@ export default function FindScreen() {
               <Text style={styles.carddate}>{formatDate(item.biz_date)}</Text>
             </View>
           ))}
-          <View
-            style={{
-              marginTop: 20,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text>已经回到最早的一天</Text>
-          </View>
+           {/* 需要上划时显示 */}
+          {contentHeight > scrollViewHeight && (
+            <View
+              style={{
+                marginTop: 20,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text>已经回到最早的一天</Text>
+            </View>
+          )}
         </ScrollView>
       )}
     </SafeAreaProvider>
