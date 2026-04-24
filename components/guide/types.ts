@@ -1,4 +1,8 @@
-export type GuideTargetKey = "message" | "profile" | "create" | "card";
+export type GuideTargetKey =
+  | "dailyKeyword"
+  | "publicBrowse"
+  | "hintEntry"
+  | "ruleHint";
 
 export type GuideRect = {
   height: number;
