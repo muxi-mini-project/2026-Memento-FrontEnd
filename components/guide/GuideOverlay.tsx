@@ -191,7 +191,6 @@ export default function GuideOverlay({
           <GuideBubble
             bubbleLeft={bubbleLeft}
             bubbleTop={bubbleTop}
-            currentStep={currentStep}
             description={step.description}
             isLastStep={currentStep === steps.length - 1}
             onPrimaryPress={onAdvance}
@@ -199,7 +198,6 @@ export default function GuideOverlay({
             placement={placement}
             tailLeft={tailLeft}
             title={step.title}
-            totalSteps={steps.length}
           />
         </Animated.View>
       </View>

@@ -6,7 +6,6 @@ import { GuideBubblePlacement } from "./types";
 type GuideBubbleProps = {
   bubbleLeft: number;
   bubbleTop: number;
-  currentStep: number;
   description: string;
   isLastStep: boolean;
   onPrimaryPress: () => void;
@@ -14,13 +13,11 @@ type GuideBubbleProps = {
   placement: GuideBubblePlacement;
   tailLeft: number;
   title: string;
-  totalSteps: number;
 };
 
 export default function GuideBubble({
   bubbleLeft,
   bubbleTop,
-  currentStep,
   description,
   isLastStep,
   onPrimaryPress,
@@ -28,7 +25,6 @@ export default function GuideBubble({
   placement,
   tailLeft,
   title,
-  totalSteps,
 }: GuideBubbleProps) {
   const tailPositionClass =
     placement === "bottom" ? "-top-2 border-l border-t" : "-bottom-2 border-b border-r";
@@ -49,14 +45,6 @@ export default function GuideBubble({
         style={{ left: tailLeft }}
       />
       <View className="rounded-[28px] border border-[#D2E1FF] bg-white px-5 pb-5 pt-4">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-medium tracking-[2px] text-[#72B6FF]">
-            新手指导
-          </Text>
-          <Text className="text-xs text-[#94A3B8]">
-            {currentStep + 1} / {totalSteps}
-          </Text>
-        </View>
         <Text className="mt-3 text-lg font-semibold text-[#22304A]">
           {title}
         </Text>
@@ -64,16 +52,6 @@ export default function GuideBubble({
           {description}
         </Text>
         <View className="mt-5 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            {Array.from({ length: totalSteps }).map((_, index) => (
-              <View
-                key={`${title}-${index}`}
-                className={`h-2 rounded-full ${
-                  index === currentStep ? "w-6 bg-[#72B6FF]" : "w-2 bg-[#D2E1FF]"
-                }`}
-              />
-            ))}
-          </View>
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={onSkip}
