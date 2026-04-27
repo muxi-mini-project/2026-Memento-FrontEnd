@@ -629,7 +629,7 @@ const BeforePublish = () => {
                   <View style={styles.voiceBar}>
                     <Sound width={16} height={16} />
                     <Text style={styles.voiceDuration}>
-                      {currentPhoto.recordingDuration}'
+                      {currentPhoto.recordingDuration}&apos;
                     </Text>
                   </View>
                   <Pressable
